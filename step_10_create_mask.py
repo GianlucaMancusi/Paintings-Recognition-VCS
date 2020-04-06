@@ -130,7 +130,9 @@ def draw_mask(img, corners):
     points : list
         list of corners [x, y]
     """
+
     pts = np.array(corners, np.int32)
+    pts = cv2.convexHull(pts)
     pts = pts.reshape((-1,1,2))
     cv2.fillPoly(img, [pts], 255)
 
