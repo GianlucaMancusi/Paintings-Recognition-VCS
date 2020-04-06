@@ -3,7 +3,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-def mean_shift_segmentation(img : np.array,spatial_radius=7, color_radius=13, maximum_pyramid_level=1):
+def mean_shift_segmentation(img : np.array,spatial_radius=7, color_radius=30, maximum_pyramid_level=1):
     """
     This function takes an image and mean-shift parameters and 
     returns a version of the image that has had mean shift 
