@@ -19,7 +19,7 @@ def hough(previousOutput):
     return cv2.HoughLines(previousOutput, 1, np.pi / 180, 150, None, 0, 0)
 
 def main():
-    rgbImage = cv2.imread('dataset/test/08_edges.png')
+    rgbImage = cv2.imread('data_test/08_edges.png')
     grayImage = cv2.cvtColor(rgbImage, cv2.COLOR_BGR2GRAY)
     _, previousOutput = cv2.threshold(grayImage, 127, 255, cv2.THRESH_BINARY)
     cdst = cv2.cvtColor(previousOutput, cv2.COLOR_GRAY2BGR)

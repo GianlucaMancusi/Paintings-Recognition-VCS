@@ -159,7 +159,7 @@ def mask(img, lines):
     return polyImg
 
 def main():
-    rgbImage = cv2.imread('dataset/test/08_edges.png')
+    rgbImage = cv2.imread('data_test/08_edges.png')
     grayImage = cv2.cvtColor(rgbImage, cv2.COLOR_BGR2GRAY)
     _, cannyOutput = cv2.threshold(grayImage, 127, 255, cv2.THRESH_BINARY)
     previousOutput = hough(cannyOutput)
