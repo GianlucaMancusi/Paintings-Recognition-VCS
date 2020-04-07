@@ -1,7 +1,6 @@
 import cv2 as cv
 import numpy as np
 
-
 """
     Cleans the noise around paintings' frames though erosion
     
