@@ -59,7 +59,10 @@ def mask_largest_segment(img: np.array, color_difference):
                     wallColor = point_colour
 
     # checks if our image pixel values are the same of the wallColor's pixel values.
-    wallmask = cv2.inRange(im, wallColor, wallColor)
+    delta = 24
+    lowerBound = tuple([x - delta for x in wallColor])
+    upperBound = tuple([x + delta for x in wallColor])
+    wallmask = cv2.inRange(im, lowerBound, upperBound)
     return wallmask
 
 
