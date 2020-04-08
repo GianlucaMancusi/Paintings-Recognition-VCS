@@ -6,23 +6,10 @@ from step_01_mean_shift_seg import mean_shift_segmentation
 import random
 
 
-def floorFill(img: np.array, color_difference):
-    mask = np.zeros(img)
-
-
-# CIAO
-# Stavo studiando da qui
-# https://github.com/nating/recognizing-paintings/blob/9ca9ba0720f71d451ffb706da950631d780acc0b/src/assignment-2/main.cpp#L135
-# linea 135
-
-# ho però implementato questa https://github.com/nating/recognizing-paintings/blob/9ca9ba0720f71d451ffb706da950631d780acc0b/src/assignment-2/vision-techniques.h#L60
-# linea 60 (per provare)
-# non va a prendere randomicamente i colori ma prende il colore del pixel analizzato
-
-# LA DOCUMANTAZIONE DI FLOORFILL
+# FLOORFILL
 # https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html?highlight=floodfill
 
-def mask_largest_segment(img: np.array, color_difference):
+def mask_largest_segment(img: np.array, color_difference=2):
     """
     The largest segment will be white and the rest is black
 
@@ -60,26 +47,20 @@ def mask_largest_segment(img: np.array, color_difference):
 
     # checks if our image pixel values are the same of the wallColor's pixel values.
     delta = 24
-    lowerBound = tuple([x - delta for x in wallColor])
-    upperBound = tuple([x + delta for x in wallColor])
+    lowerBound = tuple([max(x - delta,0) for x in wallColor])
+    upperBound = tuple([min(x + delta,255) for x in wallColor])
     wallmask = cv2.inRange(im, lowerBound, upperBound)
     return wallmask
 
 
 if __name__ == "__main__":
     rgbImage = cv2.imread('data_test/gallery_0.jpg')
-    meanshiftseg = mean_shift_segmentation(
-        rgbImage, spatial_radius=7, color_radius=30, maximum_pyramid_level=1)
-    pre = meanshiftseg.copy()
+    meanshiftseg = mean_shift_segmentation(rgbImage)
     final_mask = mask_largest_segment(meanshiftseg, 2)
-    f, axarr = plt.subplots(2, 2)
-    rgbImage = cv2.cvtColor(rgbImage, cv2.COLOR_BGR2RGB)
-    pre = cv2.cvtColor(pre, cv2.COLOR_BGR2RGB)
+    f, axarr = plt.subplots(1,2)
     meanshiftseg = cv2.cvtColor(meanshiftseg, cv2.COLOR_BGR2RGB)
     final_mask = cv2.cvtColor(final_mask, cv2.COLOR_BGR2RGB)
-    axarr[0,0].imshow(rgbImage)
-    axarr[0,1].imshow(pre)
-    axarr[1,0].imshow(meanshiftseg)
-    axarr[1,1].imshow(final_mask)
+    axarr[0].imshow(meanshiftseg)
+    axarr[1].imshow(final_mask)
     plt.show()
     pass
