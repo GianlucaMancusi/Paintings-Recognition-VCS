@@ -119,46 +119,24 @@ def find_four_corners(points):
         corners.append([x, y])
     return corners
 
-def draw_mask(img, corners):
+def find_corners(lines):
     """
-    Draw a white poligon given the corners
+    Given a list of lines it finds the 4 corners of the painting
     
     Parameters
     ----------
-    img : np.array
-        image where the polygon will be drawn
-    points : list
-        list of corners [x, y]
-    """
-
-    pts = np.array(corners, np.int32)
-    pts = cv2.convexHull(pts)
-    pts = pts.reshape((-1,1,2))
-    cv2.fillPoly(img, [pts], 255)
-
-def mask(img, lines):
-    """
-    Given an image and a list of lines it returns an image with
-    the same shape and with the mask drawn.
-    
-    Parameters
-    ----------
-    img : np.array
-        image where the polygon will be drawn
     lines : list
-        list of lines that are found in the picture
+        list of lines
 
     Returns
     -------
-    image
-        image in binary where there is drawn the mask
+    list
+        returns a list of the corners points [x, y]
     """
     groups = groups_by_angle(lines)
     points = find_all_intersections(groups)
     corners = find_four_corners(points)
-    polyImg = np.zeros_like(img)
-    draw_mask(polyImg, corners)
-    return polyImg
+    return corners
 
 def main():
     rgbImage = cv2.imread('data_test/08_edges.png')
@@ -168,23 +146,22 @@ def main():
 
     groups = groups_by_angle(previousOutput)
     points = find_all_intersections(groups)
-    corners = find_four_corners(points)
+    pointsImg = cv2.cvtColor(grayImage, cv2.COLOR_GRAY2RGB)  
+    for point in points:
+        cv2.circle(pointsImg,(point[0], point[1]), 2, (255,0,0), -1)    
 
+    corners = find_corners(previousOutput)
     cornersImg = cv2.cvtColor(grayImage, cv2.COLOR_GRAY2RGB)  
     for point in corners:
         cv2.circle(cornersImg,(point[0], point[1]), 6, (0,255,0), -1)   
 
-    pointsImg = cv2.cvtColor(grayImage, cv2.COLOR_GRAY2RGB)  
-    for point in points:
-        cv2.circle(pointsImg,(point[0], point[1]), 2, (255,0,0), -1)    
-      
-    polyImg = mask(grayImage, previousOutput)
-
-    f, axarr = plt.subplots(2, 2)
-    axarr[0, 0].imshow(grayImage, cmap='gray')
-    axarr[0, 1].imshow(pointsImg)
-    axarr[1, 0].imshow(cornersImg)
-    axarr[1, 1].imshow(polyImg, cmap='gray')
+    f, axarr = plt.subplots(1, 3)
+    axarr[0].imshow(grayImage, cmap='gray')
+    axarr[0].set_title('Source')
+    axarr[1].imshow(pointsImg)
+    axarr[1].set_title('All {} points found'.format(len(points)))
+    axarr[2].imshow(cornersImg)
+    axarr[2].set_title('The 4 corners found')
     plt.show()
 
 
