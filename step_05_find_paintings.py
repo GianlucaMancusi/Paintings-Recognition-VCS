@@ -11,9 +11,9 @@ import random
 def couldBePainting(img: np.array, bounder, contour, width, height, area_percentage):
     bounder_area = bounder[2]*bounder[3]
     # Check that the rect is smaller than the entire image and bigger than a certain size
-    if bounder_area < img.shape[0]*img.shape[1] and bounder_area > width*height:
+    if bounder_area < img.shape[0]*img.shape[1] and bounder[2] >= width and bounder[3] >= height:
         # Extra to remove floors when programming
-        if cv2.contourArea(contour) > bounder_area*.6:
+        if cv2.contourArea(contour) > bounder_area * area_percentage:
             return True
     return False
 

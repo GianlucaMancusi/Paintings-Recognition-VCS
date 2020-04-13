@@ -16,9 +16,10 @@ import numpy as np
 """
 def clean_frames_noise(img):
     kernel = np.ones((23, 23), np.uint8)
-    eroded = cv.erode(img, kernel, iterations=5)
+    # eroded = cv.erode(img, kernel, iterations=5)
+    opening = cv.morphologyEx(img, cv.MORPH_OPEN, kernel, iterations=1)
     
-    return eroded
+    return opening
 
 
 if __name__ == "__main__":

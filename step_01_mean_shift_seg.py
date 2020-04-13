@@ -28,7 +28,8 @@ def mean_shift_segmentation(img : np.array,spatial_radius=7, color_radius=30, ma
     return img
 
 if __name__ == "__main__":
-    rgbImage = cv2.imread('data_test/gallery_0.jpg')
+    rgbImage = cv2.imread('dataset/photos/001/GOPR5832/000030.jpg')
+    # rgbImage = cv2.imread('data_test/gallery_0.jpg')
     meanshiftseg = mean_shift_segmentation(rgbImage)
 
 

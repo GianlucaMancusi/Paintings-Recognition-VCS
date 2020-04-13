@@ -9,7 +9,7 @@ import random
 # FLOORFILL
 # https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html?highlight=floodfill
 
-def mask_largest_segment(img: np.array, color_difference=2):
+def mask_largest_segment(img: np.array, color_difference=2, delta=32):
     """
     The largest segment will be white and the rest is black
 
@@ -46,7 +46,6 @@ def mask_largest_segment(img: np.array, color_difference=2):
                     wallColor = point_colour
 
     # checks if our image pixel values are the same of the wallColor's pixel values.
-    delta = 24
     lowerBound = tuple([max(x - delta,0) for x in wallColor])
     upperBound = tuple([min(x + delta,255) for x in wallColor])
     wallmask = cv2.inRange(im, lowerBound, upperBound)
