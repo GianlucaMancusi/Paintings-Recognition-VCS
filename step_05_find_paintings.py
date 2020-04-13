@@ -29,7 +29,7 @@ def findPossibleContours(img: np.array, contours, min_width=150, min_height=150,
 
 if __name__ == "__main__":
     #dataset\\photos\000\\VIRB0399\\000090.jpg
-    rgbImage = cv2.imread('dataset\\photos\\000\\VIRB0399\\000090.jpg')
+    rgbImage = cv2.imread('data_test\\000090.jpg')
     meanshiftseg = mean_shift_segmentation(rgbImage)
     mask_largest = mask_largest_segment(meanshiftseg)
     final_mask = erode_dilate(mask_largest)
