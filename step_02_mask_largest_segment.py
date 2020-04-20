@@ -4,10 +4,12 @@ import math
 import matplotlib.pyplot as plt
 from step_01_mean_shift_seg import mean_shift_segmentation
 import random
+from tools.Stopwatch import Stopwatch
 
 
 # FLOORFILL
 # https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html?highlight=floodfill
+
 
 def mask_largest_segment(img: np.array, color_difference=2, delta=32):
     """
@@ -25,14 +27,22 @@ def mask_largest_segment(img: np.array, color_difference=2, delta=32):
         The distance from colors to permit.
     """
     im = img.copy()
+
+    h = im.shape[0]
+    w = im.shape[1]
+    scale_percent = .4  # percent of original size
+    height = int(h * scale_percent)
+    width = int(w * scale_percent)
+    # resize image
+    im = cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
+
     mask = np.zeros((im.shape[0]+2, im.shape[1]+2), dtype=np.uint8)
     wallColor = np.zeros((1, 1, 1))
     largest_segment = 0
     for y in range(im.shape[0]):
         for x in range(im.shape[1]):
             if mask[y+1, x+1] == 0:
-                point = (x, y)
-                point_colour = (int(im[y,x,0]),int(im[y,x,1]),int(im[y,x,2]))
+                point_colour = (int(im[y, x, 0]), int(im[y, x, 1]), int(im[y, x, 2]))
                 # Fills a connected component with the given color.
                 # loDiff – Maximal lower brightness/color difference between the currently observed pixel and one of its neighbors belonging to the component, or a seed pixel being added to the component.
                 # upDiff – Maximal upper brightness/color difference between the currently observed pixel and one of its neighbors belonging to the component, or a seed pixel being added to the component.
@@ -45,15 +55,25 @@ def mask_largest_segment(img: np.array, color_difference=2, delta=32):
                     largest_segment = segment_size
                     wallColor = point_colour
 
+    
+
+    # def myFlood(point_colour):
+    #     cv2.floodFill(im, mask, (x, y), point_colour, loDiff=color_difference, upDiff=color_difference, flags=4)
+    # vfunction = np.vectorize(myFlood)
+    # vfunction(x)
+
     # checks if our image pixel values are the same of the wallColor's pixel values.
-    lowerBound = tuple([max(x - delta,0) for x in wallColor])
-    upperBound = tuple([min(x + delta,255) for x in wallColor])
+    lowerBound = tuple([max(x - delta, 0) for x in wallColor])
+    upperBound = tuple([min(x + delta, 255) for x in wallColor])
     wallmask = cv2.inRange(im, lowerBound, upperBound)
+
+    wallmask = cv2.resize(wallmask, (w, h), interpolation=cv2.INTER_AREA)  # speedup
+
     return wallmask
 
 
 if __name__ == "__main__":
-    rgbImage = cv2.imread('data_test/gallery_0.jpg')
+    rgbImage = cv2.imread('data_test/paintings/3.jpg')
     meanshiftseg = mean_shift_segmentation(rgbImage)
     final_mask = mask_largest_segment(meanshiftseg, 2)
     f, axarr = plt.subplots(1,2)

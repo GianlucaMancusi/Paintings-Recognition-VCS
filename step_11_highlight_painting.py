@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from step_09_hough import hough
 from step_10_find_corners import find_corners
 
-def highlight_painting(img, corners):
+def highlight_painting(img, corners, pad=0):
     """
     Given an image and the four corners of the picture it returns a copy of the
     image with the picture's contours drawn.
@@ -22,6 +22,7 @@ def highlight_painting(img, corners):
     image
         image in RGB where there is drawn the cotnours are drawn
     """
+    corners = [(x - pad, y - pad) for x, y in corners]
     polyImg = np.copy(img)
 
     pts = np.array(corners, np.int32)

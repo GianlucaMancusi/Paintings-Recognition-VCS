@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 
 def mean_shift_segmentation(img : np.array,spatial_radius=7, color_radius=30, maximum_pyramid_level=1):
     """
@@ -26,6 +27,14 @@ def mean_shift_segmentation(img : np.array,spatial_radius=7, color_radius=30, ma
     """
     img = cv2.pyrMeanShiftFiltering(img, spatial_radius, color_radius, maximum_pyramid_level)
     return img
+
+def kmeans(img : np.array, n_colors=3):
+    arr = img.reshape((-1, 3))
+    kmeans = KMeans(n_clusters=n_colors, random_state=42).fit(arr)
+    labels = kmeans.labels_
+    centers = kmeans.cluster_centers_
+    less_colors = centers[labels].reshape(img.shape).astype('uint8')
+    return less_colors
 
 if __name__ == "__main__":
     rgbImage = cv2.imread('dataset/photos/001/GOPR5832/000030.jpg')

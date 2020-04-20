@@ -16,7 +16,7 @@ def hough(previousOutput):
     list
         list of all lines found in the image, None if no image is found
     """
-    return cv2.HoughLines(previousOutput, 1, np.pi / 180, 70, None, 0, 0)
+    return cv2.HoughLines(previousOutput, 1, np.pi / 180, 35, None, 0, 0)
 
 def main():
     rgbImage = cv2.imread('data_test/08_edges.png')

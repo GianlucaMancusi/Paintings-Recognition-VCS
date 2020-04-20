@@ -133,6 +133,8 @@ def find_corners(lines):
     list
         returns a list of the corners points [x, y]
     """
+    if lines is None:
+        return None
     groups = groups_by_angle(lines)
     points = find_all_intersections(groups)
     corners = find_four_corners(points)
