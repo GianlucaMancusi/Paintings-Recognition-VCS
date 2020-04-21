@@ -1,15 +1,26 @@
 import time
 
 class Stopwatch:
+    t_init = None
+
     def __init__(self):
-        self.start()
+        self.t_init = self.start()
 
     def stop(self, msg=''):
-        print('{} - {}'.format(time.time() - self.t0, msg))
+        time_elapsed = time.time() - self.t_start
+        print('{} - {}'.format(time_elapsed, msg))
+        return time_elapsed
     
     def start(self):
-        self.t0 = time.time()
+        self.t_start = time.time()
+        return self.t_start
     
     def round(self, msg=''):
-        self.stop(msg)
+        time_elapsed = self.stop(msg)
         self.start()
+        return time_elapsed
+    
+    def total(self, msg='Total'):
+        time_elapsed = time.time() - self.t_init
+        print('{} - {}'.format(time_elapsed, msg))
+        return time_elapsed
