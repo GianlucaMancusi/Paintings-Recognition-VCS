@@ -30,7 +30,7 @@ class Pipeline:
         if last_step == 1:
             return s01
 
-        s02 = mask_largest_segment(s01.copy(), delta=48)
+        s02 = mask_largest_segment(s01.copy(), delta=48, x_samples=30)
         stopwatch.round('step 02')
         if last_step == 2:
             return s02
@@ -120,6 +120,7 @@ if __name__ == "__main__":
     # outputs = [cv2.cvtColor(pipeline.run(np.array(cv2.imread("data_test/paintings/"+str(i)+".jpg")), last_step=10), cv2.COLOR_BGR2RGB) for i in range(1, smadonne)]
 
     iv = ImageViewer(smadonne, cols=3)
+    iv.remove_axis_values()
     for i in range(1, smadonne + 1):
         filename = "data_test/paintings/"+str(i)+".jpg"
         print(filename)
