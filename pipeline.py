@@ -171,21 +171,53 @@ if __name__ == "__main__":
 	# from step_12_b_create_outer_rect import mask as mask_b
 	from data_test.standard_samples import TEST_PAINTINGS
 
+	# Creando instanziando la classe Pipeline è possibile passare come valori
+	# la lista delle funzioni che verranno eseguite, passando come valore default=True
+	# verranno impostate come pipeline di funzioni quelle di default 
 	pipeline = Pipeline(default=True)
 
+	# l'ImageViewer adesso non ha più bisogno a priori del numero di immagini che verranno inserite
 	iv = ImageViewer(cols=3)
 	iv.remove_axis_values()
 
 	plots = []
+	# ho creato uno script per avere i filename delle immagini che usiamo come test
 	for filename in TEST_PAINTINGS:
 		img = np.array(cv2.imread(filename))
+		# Tramite il comando append è possibile aggiungere una funzione alla pipeline,
+		# in questo caso devo farlo perchè l'ultima funzione prende come source img
 		pipeline.append(Function(highlight_paintings, source=img, pad=100))
+		# tramite il comando run eseguo le funzioni in ordine.
+		# con debug=True per ogni step vengono create delle immagini di debug che poi
+		# possono essere visualizzate in sequenza
+		# con print_time=True vengono stampati i tempi per ogni funzione
+		# filename è opzionale, serve per la stampa
 		out = pipeline.run(img, debug=True, print_time=True, filename=filename)
+		# debug_history() ritorna una classe ImageViewer con la sequenza degli output di ogni funzione
 		plots.append(pipeline.debug_history())
 		iv.add(out, cmap='bgr')
+		# con pop viene tolta l'ultima funzione dalla lista della pipeline
 		pipeline.pop()
 
 	for plot in plots:
+		# vengono visualizzati tutti i grafici di debug
 		plot.show()
 	
 	iv.show()
+
+	# IMPORTANTE #######################################################################################
+	# La Pipeline eseguita con il comando debug=False ritornerà i valori dell'ultima funzione che non sono
+	# obbligatoriamente delle immagini, infatti in paintings_rectification.py la uso per ottenere i corners
+	# dei quadri trovati. Mentre con debug=True ritornerà l'ultima immagine di debug creata.
+	# 
+	# Ogni funzione che viene inserita nella pipeline accetta una variabile input ed una variabile debug
+	# In caso di debug=False ritorna un output, in caso di debug=True ritorna un output ed un immagine che
+	# serve a far visualizzare il risultato della funzione.
+	# 
+	# La funzione viene "wrappata" dalla classe Function in modo da essere passata alla pipeline
+	# La classe Function ha una variabile chiamata multiwrapper che serve per simulare i cicli for
+	# Infatti prendendo come esempio la funzione "find_possible_contours" questa ritornerà una lista di
+	# (img, contours). Con multiwrapper=True la funzione successiva "mask_from_contour" verra eseguita
+	# per ogni elemento della lista e l'output totale sarà una concatenazione degli output. In caso di
+	# debug=True l'immagine generata sarà una sorta di blending delle immagini di output generate dalla
+	# singola funzione.
