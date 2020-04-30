@@ -1,6 +1,5 @@
-import cv2 as cv
+import cv2
 import numpy as np
-from step_07_median_filter import apply_median_filter
 
 """
     Applies Canny's edge detector
@@ -15,16 +14,21 @@ from step_07_median_filter import apply_median_filter
     img
         the image's edges
 """
-def apply_edge_detection(img):
-    return cv.Canny(img, 50, 100)
+def apply_edge_detection(input, debug=False):
+    result = cv2.Canny(input, 50, 100)
+    if debug:
+        kernel = np.ones((5, 5), np.uint8)
+        debug_img = cv2.dilate(result, kernel)
+        return result, debug_img
+    else:
+        return result
 
 
 if __name__ == "__main__":
-    img = cv.imread("data_test/median_filter_sample.png")
-    img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
-    filtered = apply_median_filter(img)
-    edges = apply_edge_detection(filtered)
-    cv.imshow("Original", img)
-    cv.imshow("Filtered", edges)
-
-    cv.waitKey(0)
+    from pipeline import Pipeline
+    from data_test.standard_samples import RANDOM_PAINTING
+    img = cv2.imread(RANDOM_PAINTING)
+    pipeline = Pipeline()
+    pipeline.set_default(8)
+    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    pipeline.debug_history().show()

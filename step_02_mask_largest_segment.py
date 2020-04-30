@@ -1,18 +1,14 @@
 import cv2
 import numpy as np
 import math
-import matplotlib.pyplot as plt
-from step_01_mean_shift_seg import mean_shift_segmentation
 import random
-from tools.Stopwatch import Stopwatch
-from tools.ImageViewer import ImageViewer
 
 
 # FLOORFILL
 # https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html?highlight=floodfill
 
 
-def mask_largest_segment(img: np.array, color_difference=2, delta=32, scale_percent=1.0, x_samples=64):
+def mask_largest_segment(input: np.array, color_difference=2, delta=32, scale_percent=1.0, x_samples=64, debug=False):
     """
     The largest segment will be white and the rest is black
 
@@ -30,7 +26,7 @@ def mask_largest_segment(img: np.array, color_difference=2, delta=32, scale_perc
     x_samples : int
         numer of samples that will be tested orizontally in the image
     """
-    im = img.copy()
+    im = input.copy()
 
     h = im.shape[0]
     w = im.shape[1]
@@ -71,23 +67,17 @@ def mask_largest_segment(img: np.array, color_difference=2, delta=32, scale_perc
 
     wallmask = cv2.resize(wallmask, (w, h), interpolation=cv2.INTER_AREA)  # strideeedup
 
-    return wallmask
+    if debug:
+        return wallmask, wallmask
+    else:
+        return wallmask
 
 
 if __name__ == "__main__":
-
-    iv = ImageViewer(16, cols=4)
-    iv.remove_axis_values()
-    for i in iv.range():
-        x_samples =  20 + (3 * i)
-        rgbImage = cv2.imread('data_test/paintings/3.jpg')
-        meanshiftseg = mean_shift_segmentation(rgbImage)
-        timer = Stopwatch()
-        final_mask = mask_largest_segment(meanshiftseg, 2, x_samples=x_samples)
-        t2 = timer.stop('x_samples={}'.format(x_samples))
-        meanshiftseg = cv2.cvtColor(meanshiftseg, cv2.COLOR_BGR2RGB)
-        final_mask = cv2.cvtColor(final_mask, cv2.COLOR_BGR2RGB)
-        # iv.add(meanshiftseg, 'ms - {} - {:.02f}s'.format(stride, t1))
-        iv.add(final_mask, 'x_samples={} - {:.02f}s'.format(x_samples, t2))
-        print()
-    iv.show()
+    from data_test.standard_samples import RANDOM_PAINTING
+    from pipeline import Pipeline
+    img = cv2.imread(RANDOM_PAINTING)
+    pipeline = Pipeline()
+    pipeline.set_default(2)
+    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    pipeline.debug_history().show()

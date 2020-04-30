@@ -1,4 +1,4 @@
-import cv2 as cv
+import cv2
 import numpy as np
 
 
@@ -15,15 +15,19 @@ import numpy as np
     img
         the smoothed image
 """
-def apply_median_filter(img):
-    return cv.medianBlur(img, 31)
+def apply_median_filter(input, debug=False):
+    result = cv2.medianBlur(input, 31)
+    if debug:
+        return result, result
+    else:
+        return result
 
 
 if __name__ == "__main__":
-    img = cv.imread("data_test/median_filter_sample.png")
-    img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
-    filtered = apply_median_filter(img)
-    cv.imshow("Original", img)
-    cv.imshow("Filtered", filtered)
-
-    cv.waitKey(0)
+    from pipeline import Pipeline
+    from data_test.standard_samples import RANDOM_PAINTING
+    img = cv2.imread(RANDOM_PAINTING)
+    pipeline = Pipeline()
+    pipeline.set_default(7)
+    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    pipeline.debug_history().show()

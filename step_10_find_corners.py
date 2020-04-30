@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 import math
-import matplotlib.pyplot as plt
-from step_09_hough import hough
 
 def intersection(line1, line2):
     """Finds the intersection of two lines given in Hesse normal form.
@@ -119,7 +117,16 @@ def find_four_corners(points):
         corners.append([x, y])
     return corners
 
-def find_corners(lines):
+def draw_corners(img, corners):
+    kernel = np.ones((5, 5), np.uint8)
+    debug_img = cv2.dilate(img.copy(), kernel)
+    canvas = np.stack((debug_img,)*3, axis=-1)
+    color = np.random.randint(256, size=3).tolist()
+    for point in corners:
+        cv2.circle(canvas, (point[0], point[1]), 20, color, -1)
+    return canvas
+
+def find_corners(input, debug=False):
     """
     Given a list of lines it finds the 4 corners of the painting
     
@@ -133,39 +140,24 @@ def find_corners(lines):
     list
         returns a list of the corners points [x, y]
     """
+    img, lines = input
     if lines is None:
         return None
     groups = groups_by_angle(lines)
     points = find_all_intersections(groups)
     corners = find_four_corners(points)
-    return corners
-
-def main():
-    rgbImage = cv2.imread('data_test/08_edges.png')
-    grayImage = cv2.cvtColor(rgbImage, cv2.COLOR_BGR2GRAY)
-    _, cannyOutput = cv2.threshold(grayImage, 127, 255, cv2.THRESH_BINARY)
-    previousOutput = hough(cannyOutput)
-
-    groups = groups_by_angle(previousOutput)
-    points = find_all_intersections(groups)
-    pointsImg = cv2.cvtColor(grayImage, cv2.COLOR_GRAY2RGB)  
-    for point in points:
-        cv2.circle(pointsImg,(point[0], point[1]), 2, (255,0,0), -1)    
-
-    corners = find_corners(previousOutput)
-    cornersImg = cv2.cvtColor(grayImage, cv2.COLOR_GRAY2RGB)  
-    for point in corners:
-        cv2.circle(cornersImg,(point[0], point[1]), 6, (0,255,0), -1)   
-
-    f, axarr = plt.subplots(1, 3)
-    axarr[0].imshow(grayImage, cmap='gray')
-    axarr[0].set_title('Source')
-    axarr[1].imshow(pointsImg)
-    axarr[1].set_title('All {} points found'.format(len(points)))
-    axarr[2].imshow(cornersImg)
-    axarr[2].set_title('The 4 corners found')
-    plt.show()
+    if debug:
+        canvas = draw_corners(img, corners)
+        return corners, canvas
+    else:
+        return corners
 
 
 if __name__ == '__main__':
-    main()
+    from pipeline import Pipeline
+    from data_test.standard_samples import RANDOM_PAINTING
+    img = cv2.imread(RANDOM_PAINTING)
+    pipeline = Pipeline()
+    pipeline.set_default(10)
+    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    pipeline.debug_history().show()

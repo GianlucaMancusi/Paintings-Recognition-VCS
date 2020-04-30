@@ -1,14 +1,9 @@
 import cv2
 import numpy as np
 import math
-import matplotlib.pyplot as plt
-from step_01_mean_shift_seg import mean_shift_segmentation
-from step_02_mask_largest_segment import mask_largest_segment
-
-import random
 
 
-def erode_dilate(img: np.array, size=5, erode=True):
+def erode_dilate(input: np.array, size=5, erode=True, debug=False):
     """
     Dilates an image by using a specific structuring element
 
@@ -17,37 +12,53 @@ def erode_dilate(img: np.array, size=5, erode=True):
     img : np.array
         image where to apply the dilatation
     """
+    img = input
     kernel = np.ones((size, size), np.uint8)
     if erode: 
         img = cv2.erode(img, kernel)
     img = cv2.dilate(img, kernel)
-    return img
+    if debug:
+        return img, img
+    else:
+        return img
 
-def invert(img: np.array):
+def invert(input: np.array, debug=False):
     """
     White becomes Black and viceversa
     ----------
     img : np.array
         image where to apply the inversion
     """
-    return 255-img
+    result = 255-input
+    if debug:
+        return result, result
+    else:
+        return result
 
 def erode_dilate_invert(img:np.array, size=5, erode=True):
     inversion = invert(erode_dilate(img,size, erode))
     return inversion
 
+def add_padding(input, pad=100, color=[0, 0, 0], debug=False):
+    result = cv2.copyMakeBorder(
+            input,
+            top=pad,
+            bottom=pad,
+            left=pad,
+            right=pad,
+            borderType=cv2.BORDER_CONSTANT,
+            value=[0, 0, 0]
+        )
+    if debug:
+        return result, result
+    else:
+        return result
+
 if __name__ == "__main__":
-    rgbImage = cv2.imread('data_test/gallery_0.jpg')
-    meanshiftseg = mean_shift_segmentation(rgbImage)
-    mask_largest = mask_largest_segment(meanshiftseg)
-    final_mask = erode_dilate(mask_largest)
-    inversion = invert(final_mask)
-    f, axarr = plt.subplots(1,3)
-    mask_largest = cv2.cvtColor(mask_largest, cv2.COLOR_BGR2RGB)
-    final_mask = cv2.cvtColor(final_mask, cv2.COLOR_BGR2RGB)
-    inversion = cv2.cvtColor(inversion, cv2.COLOR_BGR2RGB)
-    axarr[0].imshow(mask_largest)
-    axarr[1].imshow(final_mask)
-    axarr[2].imshow(inversion)
-    plt.show()
-    pass
+    from data_test.standard_samples import RANDOM_PAINTING
+    from pipeline import Pipeline
+    img = cv2.imread(RANDOM_PAINTING)
+    pipeline = Pipeline()
+    pipeline.set_default(3)
+    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    pipeline.debug_history().show()

@@ -1,10 +1,9 @@
 import cv2
 import numpy as np
 import math
-import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-def mean_shift_segmentation(img : np.array,spatial_radius=7, color_radius=30, maximum_pyramid_level=1):
+def mean_shift_segmentation(input : np.array, spatial_radius=7, color_radius=30, maximum_pyramid_level=1, debug=False):
     """
     This function takes an image and mean-shift parameters and 
     returns a version of the image that has had mean shift 
@@ -25,8 +24,13 @@ def mean_shift_segmentation(img : np.array,spatial_radius=7, color_radius=30, ma
     maximum_pyramid_level : int
         Maximum level of the pyramid for the segmentation.
     """
+    img = input
     img = cv2.pyrMeanShiftFiltering(img, spatial_radius, color_radius, maximum_pyramid_level)
-    return img
+
+    if debug:
+        return img, img
+    else:
+        return img
 
 def kmeans(img : np.array, n_colors=3):
     arr = img.reshape((-1, 3))
@@ -37,15 +41,10 @@ def kmeans(img : np.array, n_colors=3):
     return less_colors
 
 if __name__ == "__main__":
-    rgbImage = cv2.imread('dataset/photos/001/GOPR5832/000030.jpg')
-    # rgbImage = cv2.imread('data_test/gallery_0.jpg')
-    meanshiftseg = mean_shift_segmentation(rgbImage)
-
-
-    f, axarr = plt.subplots(1, 2)
-    rgbImage = cv2.cvtColor(rgbImage, cv2.COLOR_BGR2RGB)
-    meanshiftseg = cv2.cvtColor(meanshiftseg, cv2.COLOR_BGR2RGB)
-    axarr[0].imshow(rgbImage)
-    axarr[1].imshow(meanshiftseg)
-    plt.show()
-    pass
+    from data_test.standard_samples import RANDOM_PAINTING
+    from pipeline import Pipeline
+    img = cv2.imread(RANDOM_PAINTING)
+    pipeline = Pipeline()
+    pipeline.set_default(1)
+    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    pipeline.debug_history().show()

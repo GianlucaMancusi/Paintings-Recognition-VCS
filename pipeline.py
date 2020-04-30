@@ -1,131 +1,191 @@
 import numpy as np
 import cv2
 import time
-from tools.ImageViewer import ImageViewer
+from colorama import init, Fore, Back, Style
+init()
+from image_viewer import ImageViewer
+from stopwatch import Stopwatch
 
-from step_01_mean_shift_seg import *
-from step_02_mask_largest_segment import *
-from step_03_dilate_invert import *
-from step_04_connected_components import *
-from step_05_find_paintings import *
-from step_06_erosion import *
-from step_07_median_filter import *
-from step_08_canny_edge_detection import *
-from step_09_hough import *
-from step_10_find_corners import *
-from step_11_highlight_painting import *
-from step_12_create_mask import *
-from tools.Stopwatch import Stopwatch
+class Function:
+	def __init__(self, function, multiwrapper=False, **kwargs):
+		self.function = function
+		self.params = kwargs
+		self.multiwrapper = multiwrapper
+	
+	def run(self, debug=False, **kwargs):
+		params = self.params.copy()
+		add_params_to_dict(params, **kwargs)
+		if self.multiwrapper:
+			return self.multi_run(debug=debug, **params)
+		else:
+			return self.function(debug=debug, **params)
+	
+	def multi_run(self, debug=False, **kwargs):
+		return multiwrapper(func=self.function, debug=debug, **kwargs)
+	
+	def addParams(self, **kwargs):
+		add_params_to_dict(self.params, **kwargs)
+	
+	def __str__(self):
+		return self.function.__name__
+
+def add_params_to_dict(dictionay, **kwargs):
+	for key, value in kwargs.items():
+		dictionay[key] = value
+
+def merge_sum_norm(images):
+	canvas = np.zeros_like(images[0], dtype=np.int64)
+	for img in images:
+		canvas += img
+	canvas = canvas / canvas.max()
+	canvas *= 255
+	return canvas.astype(np.uint8)
+
+def merge_sum_clip(images):
+	canvas = np.zeros_like(images[0], dtype=np.int64)
+	for img in images:
+		canvas += img
+	np.clip(canvas, a_min=0, a_max=255,  out=canvas)
+	return canvas.astype(np.uint8)
+
+def merge_sum_threshold(images):
+	canvas = merge_sum_norm(images)
+	_, result = cv2.threshold(canvas, 127, 255, cv2.THRESH_BINARY)
+	return result
+
+def multiwrapper(input: list, func, debug=False, multi_debug_merge_func=merge_sum_norm, **kwargs):
+	output_list = []
+	output_debug_list = []
+	for single_input in input:
+		if debug:
+			output, output_debug = func(single_input, debug=debug, **kwargs)
+			output_debug_list.append(output_debug)
+		else:
+			output = func(single_input, debug=debug, **kwargs)
+		output_list.append(output)
+	if debug:
+		output_debug_merged = multi_debug_merge_func(output_debug_list)
+		return output_list, output_debug_merged
+	else:
+		return output_list
 
 class Pipeline:
+	functions = []
+	debug_out_list = []
+	source = None
 
-    def run(self, rgbImage: np.ndarray, last_step: int):
-        out_rgb = rgbImage.copy()
+	def __init__(self, functions=[], default=False):
+		self.functions = functions
+		self.set_default() if default else None
+		self.debug_out_list = []
+	
+	def set_default(self, load_first=None):
+		self.functions = []
+		if load_first is None or load_first > 0:
+			from step_01_mean_shift_seg import mean_shift_segmentation
+			self.functions.append(Function(mean_shift_segmentation, spatial_radius=7, color_radius=150, maximum_pyramid_level=1))
 
-        total = Stopwatch()
-        stopwatch = Stopwatch()
-        
-        s01 = mean_shift_segmentation(rgbImage.copy(), spatial_radius=7, color_radius=150, maximum_pyramid_level=1)
-        stopwatch.round('step 01')
-        if last_step == 1:
-            return s01
+		if load_first is None or load_first > 1:
+			from step_02_mask_largest_segment import mask_largest_segment
+			self.functions.append(Function(mask_largest_segment, delta=48, x_samples=30))
 
-        s02 = mask_largest_segment(s01.copy(), delta=48, x_samples=30)
-        stopwatch.round('step 02')
-        if last_step == 2:
-            return s02
+		if load_first is None or load_first > 2:
+			from step_03_dilate_invert import erode_dilate, invert, add_padding
+			self.functions.append(Function(erode_dilate, size=5, erode=False))
+			self.functions.append(Function(invert))
+			self.functions.append(Function(add_padding, pad=100))
 
-        s03 = erode_dilate(s02.copy(), size=5, erode=False)
-        stopwatch.round('step 03')
-        if last_step == 3:
-            return s03
+		if load_first is None or load_first > 3:
+			from step_04_connected_components import find_contours
+			self.functions.append(Function(find_contours))
 
-        s04 = invert(s03.copy())
-        stopwatch.round('step 04')
-        if last_step == 4:
-            return s04
+		if load_first is None or load_first > 4:
+			from step_05_find_paintings import find_possible_contours
+			self.functions.append(Function(find_possible_contours))
 
-        bordersize = 100
-        s04 = cv2.copyMakeBorder(
-                    s04,
-                    top=bordersize,
-                    bottom=bordersize,
-                    left=bordersize,
-                    right=bordersize,
-                    borderType=cv2.BORDER_CONSTANT,
-                    value=[0, 0, 0]
-        )
+		if load_first is None or load_first > 5:
+			from step_06_erosion import  clean_frames_noise, mask_from_contour
+			self.functions.append(Function(mask_from_contour, multiwrapper=True))
+			self.functions.append(Function(clean_frames_noise, multiwrapper=True))
 
-        s05 = findContours(s04.copy())
-        s05_2 = findPossibleContours(s04, s05)
-        s05_debug = s04.copy()
-        s05_debug = cv2.cvtColor(s05_debug, cv2.COLOR_GRAY2BGR)
-        stopwatch.round('step 05')
-        if last_step == 5:
-            return s05_debug
+		if load_first is None or load_first > 6:
+			from step_07_median_filter import apply_median_filter
+			self.functions.append(Function(apply_median_filter, multiwrapper=True))
 
-        # initilizing structures
-        s06_total = np.zeros_like(s05_debug)
-        s06_total_2 = np.zeros_like(s05_debug)
-        s07_total = np.zeros_like(s05_debug)
-        s08_total = np.zeros_like(s05_debug)[:, :, 1]
-        
-        for painting_contour in s05_2:
-            color1 = (list(np.random.choice(range(256), size=3)))
-            color = [int(color1[0]), int(color1[1]), int(color1[2])]
-            cv2.fillPoly(s05_debug, pts=[painting_contour], color=color)
+		if load_first is None or load_first > 7:
+			from step_08_canny_edge_detection import apply_edge_detection
+			self.functions.append(Function(apply_edge_detection, multiwrapper=True, multi_debug_merge_func=merge_sum_threshold))
 
-            s06_pre_bw = np.zeros_like(s05_debug)
-            cv2.fillPoly(s06_pre_bw, pts=[
-                         painting_contour], color=(255, 255, 255))
-            cv2.fillPoly(s06_total, pts=[
-                         painting_contour], color=(255, 255, 255))
+		if load_first is None or load_first > 8:
+			from step_09_hough import hough
+			self.functions.append(Function(hough, multiwrapper=True, pad=100))
 
-            s06_cleaned = clean_frames_noise(s06_pre_bw)
-            s06_total_2 += s06_cleaned
-            s07_median = apply_median_filter(s06_cleaned)
-            s07_total += s07_median
-            
-            s08_canny = apply_edge_detection(s07_median)
-            s08_total += s08_canny
-            _, s08_canny = cv2.threshold(
-                s08_canny, 127, 255, cv2.THRESH_BINARY)
+		if load_first is None or load_first > 9:
+			from step_10_find_corners import find_corners
+			self.functions.append(Function(find_corners, multiwrapper=True, multi_debug_merge_func=merge_sum_clip))
+	
+	def append(self, function):
+		self.functions.append(function)
+	
+	def pop(self):
+		self.functions.pop()
 
-            s09_lines = hough(s08_canny)
-            s09_debug = rgbImage.copy()
-            if s09_lines is not None:
-                for i in range(0, len(s09_lines)):
-                    rho = s09_lines[i][0][0]
-                    theta = s09_lines[i][0][1]
-                    a = math.cos(theta)
-                    b = math.sin(theta)
-                    x0 = a * rho
-                    y0 = b * rho
-                    pt1 = (int(x0 + 1000*(-b)) - bordersize, int(y0 + 1000*(a)) - bordersize)
-                    pt2 = (int(x0 - 1000*(-b)) - bordersize, int(y0 - 1000*(a)) - bordersize)
-                    cv2.line(s09_debug, pt1, pt2,
-                             (255, 255, 255), 3, cv2.LINE_AA)
-            
-            s10_corners = find_corners(s09_lines)
-            if s10_corners is None:
-                continue
-            out_rgb = highlight_painting(out_rgb, s10_corners, pad=bordersize)
+	def run(self, img, step=None, debug=False, print_time=False, filename='unknown'):
+		self.debug_out_list = []
+		self.source = img
+		funcs_to_run = self.functions[:step]
+		output = self.source
+		stopwatch = Stopwatch()
+		log_string = '{}\t{: <16}\t{:.04f}s   {:.02f} fps'
+		for func in funcs_to_run:
+			if debug:
+				output, output_debug = func.run(debug, input=output)
+				self.debug_out_list.append(output_debug)
+			else:
+				output = func.run(debug, input=output)
+			t = stopwatch.round()
+			if print_time:
+				fps = 1 / t if t != 0 else 999
+				print(log_string.format(filename, str(func), t, fps))
+			
+		t = stopwatch.total()
+		fps = 1 / t if t != 0 else 999
+		print(Fore.YELLOW + log_string.format(filename, 'TOTAL', t, fps) + Fore.RESET)
+		print() if print_time else None
 
-        total.stop('Total\n')
-        return out_rgb
+		if debug:
+			return self.debug_out_list[-1]
+		else:
+			return output
+	
+	def debug_history(self):
+		iv = ImageViewer()
+		iv.remove_axis_values()
+		iv.add(self.source, 'source', cmap='bgr')
+		for img, func in zip(self.debug_out_list, self.functions):
+			iv.add(img, str(func), cmap='bgr')
+		return iv
 
 if __name__ == "__main__":
-    pipeline = Pipeline()
-    smadonne = 9
-    # outputs = [cv2.cvtColor(pipeline.run(np.array(cv2.imread("data_test/paintings/"+str(i)+".jpg")), last_step=10), cv2.COLOR_BGR2RGB) for i in range(1, smadonne)]
+	from step_11_highlight_painting import highlight_paintings
+	# from step_12_b_create_outer_rect import mask as mask_b
+	from data_test.standard_samples import TEST_PAINTINGS
 
-    iv = ImageViewer(smadonne, cols=3)
-    iv.remove_axis_values()
-    for i in range(1, smadonne + 1):
-        filename = "data_test/paintings/"+str(i)+".jpg"
-        print(filename)
-        img = cv2.imread(filename)
-        out = pipeline.run(np.array(img), last_step=10)
-        out = cv2.cvtColor(out, cv2.COLOR_BGR2RGB)
-        iv.add(out)
-    iv.show()
+	pipeline = Pipeline(default=True)
+
+	iv = ImageViewer(cols=3)
+	iv.remove_axis_values()
+
+	plots = []
+	for filename in TEST_PAINTINGS:
+		img = np.array(cv2.imread(filename))
+		pipeline.append(Function(highlight_paintings, source=img, pad=100))
+		out = pipeline.run(img, debug=True, print_time=True, filename=filename)
+		plots.append(pipeline.debug_history())
+		iv.add(out, cmap='bgr')
+		pipeline.pop()
+
+	for plot in plots:
+		plot.show()
+	
+	iv.show()
