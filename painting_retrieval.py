@@ -5,22 +5,17 @@ from tools.Stopwatch import Stopwatch
 
 def filter_matches(matches, threshold: float):
     correct_matches = []
-    for m in matches:
-        if m[0].distance < threshold * m[1].distance:
+    for i, m in enumerate(matches):
+        if i < len(matches) - 1 and m.distance < 0.7 * matches[i+1].distance:
             correct_matches.append(m)
     return correct_matches
 
 
 def draw_matches(matches, img1, img2, kp1, kp2, threshold=0.7):
-    matchesMask = [[0, 0] for i in range(len(matches))]
-    for i, (m, n) in enumerate(matches):
-        if m.distance < threshold * n.distance:
-            matchesMask[i] = [1, 0]
-    draw_params = dict(matchColor=(0, 255, 0),
-                       singlePointColor=(255, 0, 0),
-                       matchesMask=matchesMask,
-                       flags=cv.DrawMatchesFlags_DEFAULT)
-    return cv.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, **draw_params)
+    sorted_matches = sorted(matches, key=lambda x: x.distance)
+    img3 = cv.drawMatches(img1, kp1, img2, kp2,
+                          sorted_matches[:10], None, flags=2)
+    return img3
 
 
 def get_flann_matcher():
@@ -35,31 +30,27 @@ def resize_image(img, resize_factor: float):
         img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)), interpolation=cv.INTER_AREA)
 
 
-def find_painting(painting: str, dataset: list, threshold=0.7, neighbors=2, verbose=False):
-    # creates SIFT instance: some versions of openCV do not contain that
-    # if you have some troubles with it, run the following commands:
-    # pip uninstall opencv-python
-    # pip uninstall opencv-contrib-python
-    # pip install opencv-contrib-python==3.4.2.17
-
-    sift = cv.xfeatures2d.SIFT_create()
-    flann = get_flann_matcher()
+def retrieve_painting(painting: str, dataset: list, threshold=0.7, neighbors=2, verbose=False):
+    
+    # install opencv-contrib python
+    orb = cv.ORB_create()
+    bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=True)
 
     img1 = cv.imread(painting, cv.IMREAD_GRAYSCALE)
 
     # since FHD images are too heavy, they're simply brutally resized.
     # The number of matching keypoints  appers to scale according to this factor
-    resize_factor = 0.1
+    resize_factor = 0.15
     img1 = resize_image(img1, resize_factor)
 
-    kp1, des1 = sift.detectAndCompute(img1, None)
+    kp1, des1 = orb.detectAndCompute(img1, None)
     matches_counts = []
     for p in dataset:
         img2 = cv.imread(p, cv.IMREAD_GRAYSCALE)
         img2 = resize_image(img2, resize_factor)
 
-        kp2, des2 = sift.detectAndCompute(img2, None)
-        matches = flann.knnMatch(des1, des2, k=neighbors)
+        kp2, des2 = orb.detectAndCompute(img2, None)
+        matches = bf.match(des1, des2,)
         matches = filter_matches(matches, threshold=threshold)
         matches_counts.append(len(matches))
         if verbose:
@@ -79,9 +70,9 @@ if __name__ == "__main__":
     painting = "data_test/paintings/{}.jpg".format(test_image_id)
 
     watch = Stopwatch()
-    verbose = True
+    verbose = False
     watch.start()
-    res = find_painting(painting, dataset, verbose=verbose)
+    res = retrieve_painting(painting, dataset, verbose=verbose)
     watch.stop()
     if verbose:
         cv.waitKey(0)
