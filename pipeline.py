@@ -80,6 +80,9 @@ class Pipeline:
 		self.debug_out_list = []
 	
 	def set_default(self, load_first=None):
+		"""
+		load_first definisce quanti step caricare, se lasciato None li carica tutti
+		"""
 		self.functions = []
 		if load_first is None or load_first > 0:
 			from step_01_mean_shift_seg import mean_shift_segmentation
