@@ -14,34 +14,35 @@ def undistort(img):
     pass
 
 
-def findKValue(img):
-    original_ROI = img[:365, :100]
-    c_x, c_y = img.shape[0]//2, img.shape[1]//2
+# QUI STAVO IMPLEMENTANDO IL PAPER DELLA CUCCHIARA...
+# def findKValue(img):
+#     original_ROI = img[:365, :100]
+#     c_x, c_y = img.shape[0]//2, img.shape[1]//2
 
-    new_ROI = np.zeros_like(original_ROI)
-    index_matrix = np.indices(new_ROI.shape)
-    index_matrix[0] = index_matrix[0]-c_x
-    index_matrix[1] = index_matrix[1]-c_y
+#     new_ROI = np.zeros_like(original_ROI)
+#     index_matrix = np.indices(new_ROI.shape)
+#     index_matrix[0] = index_matrix[0]-c_x
+#     index_matrix[1] = index_matrix[1]-c_y
 
-    for i in range(n):
-        k1 = k_min + i * (k_max - k_min)/n
-        # distorted radius
-        r_d = np.sqrt(index_matrix[0]**2+index_matrix[1]**2)
-        # undistorted coords (new image)
-        x_u = index_matrix[0] + (index_matrix[0] - c_x)*(k1*r_d**2)
-        y_u = index_matrix[1] + (index_matrix[1] - c_y)*(k1*r_d**2)
-        # undistorted radius
-        r_u = np.sqrt(index_matrix[0]**2+index_matrix[1]**2)
-        if k1 > 0:
-            r_d = np.cbrt(r_u/(2*k1)+np.sqrt((1/(3*k1))**3+(r_u/(2*k1))**2)) + \
-                np.cbrt(r_u/(2*k1)-np.sqrt((1/(3*k1))**3+(r_u/(2*k1))**2))
-        # distorted coords (original image)
-        x_d = c_x + (index_matrix[0]-c_x)*(r_d/r_u)
-        y_d = c_y + (index_matrix[1]-c_y)*(r_d/r_u)
+#     for i in range(n):
+#         k1 = k_min + i * (k_max - k_min)/n
+#         # distorted radius
+#         r_d = np.sqrt(index_matrix[0]**2+index_matrix[1]**2)
+#         # undistorted coords (new image)
+#         x_u = index_matrix[0] + (index_matrix[0] - c_x)*(k1*r_d**2)
+#         y_u = index_matrix[1] + (index_matrix[1] - c_y)*(k1*r_d**2)
+#         # undistorted radius
+#         r_u = np.sqrt(index_matrix[0]**2+index_matrix[1]**2)
+#         if k1 > 0:
+#             r_d = np.cbrt(r_u/(2*k1)+np.sqrt((1/(3*k1))**3+(r_u/(2*k1))**2)) + \
+#                 np.cbrt(r_u/(2*k1)-np.sqrt((1/(3*k1))**3+(r_u/(2*k1))**2))
+#         # distorted coords (original image)
+#         x_d = c_x + (index_matrix[0]-c_x)*(r_d/r_u)
+#         y_d = c_y + (index_matrix[1]-c_y)*(r_d/r_u)
 
-        new_ROI = original_ROI[y_d, x_d]
+#         new_ROI = original_ROI[y_d, x_d]
 
-    # LOOP algorithm
+#     # LOOP algorithm
 
 
 def nothing(x):
