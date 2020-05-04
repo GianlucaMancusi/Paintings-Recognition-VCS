@@ -50,8 +50,8 @@ def retrieve_painting(painting, dataset, threshold=0.7, resize_factor=0.10, verb
 
     Returns
     -------
-    int
-        returns the index of the image of the dataset having the highest number of matching points
+    list
+        returns a normalized histogram containing the confindence of each dataset's painting to contain the target painting 
     """
 
     orb = cv2.ORB_create()
@@ -75,7 +75,8 @@ def retrieve_painting(painting, dataset, threshold=0.7, resize_factor=0.10, verb
             cv2.imshow(f"Comparison with image {i + 1}",
                        draw_matches(matches, img1, img2, kp1, kp2))
 
-    return np.argmax(matches_counts)
+    summation = np.sum(matches_counts)
+    return [m / summation for m in matches_counts]
 
 
 if __name__ == "__main__":
@@ -92,7 +93,8 @@ if __name__ == "__main__":
 
     verbose = False
     watch.start()
-    res = retrieve_painting(painting_image, dataset_images, verbose=verbose)
+    scores = retrieve_painting(painting_image, dataset_images, verbose=verbose)
+    res = np.argmax(scores)
     print(watch.stop())
     print(
         f"The painting in the image {painting} is also contained in image {dataset[res]}")
