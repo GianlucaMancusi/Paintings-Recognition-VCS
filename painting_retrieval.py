@@ -5,17 +5,17 @@ from data_test.standard_samples import TEST_PAINTINGS, RANDOM_PAINTING
 
 
 def filter_matches(matches, threshold: float):
-    correct_matches = []
+    length, correct_matches = len(matches), []
     for i, m in enumerate(matches):
-        if i < len(matches) - 1 and m.distance < 0.7 * matches[i+1].distance:
+        if i < length - 1 and m.distance < threshold * matches[i+1].distance:
             correct_matches.append(m)
     return correct_matches
 
 
-def draw_matches(matches, img1, img2, kp1, kp2, threshold=0.7):
+def draw_matches(matches, img1, img2, kp1, kp2,):
     sorted_matches = sorted(matches, key=lambda x: x.distance)
     img3 = cv2.drawMatches(img1, kp1, img2, kp2,
-                          sorted_matches[:10], None, flags=2)
+                           sorted_matches[:10], None, flags=2)
     return img3
 
 
@@ -31,23 +31,39 @@ def resize_image(img, resize_factor: float):
         img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)), interpolation=cv2.INTER_AREA)
 
 
-def retrieve_painting(painting: str, dataset: list, threshold=0.7, neighbors=2, verbose=False):
-    
-    # install opencv-contrib python
+def retrieve_painting(painting, dataset, threshold=0.7, resize_factor=0.10, verbose=False):
+    """
+    Finds a given painting inside a dataset.
+
+    Parameters
+    ----------
+    painting : np.array
+        image to find inside the dataset
+    dataset : list of np.array
+        list of the images to analyze
+    threshold: float
+        the minimum ratio that a pair of keypoints must have to be considered as a pair of matching points  
+    resize_factor: float
+        images' sizes is resized by this factor to speed up computation 
+    verbose: bool
+        if True, the results are shown on the console and on the images
+
+    Returns
+    -------
+    int
+        returns the index of the image of the dataset having the highest number of matching points
+    """
+
     orb = cv2.ORB_create()
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
-    img1 = cv2.imread(painting, cv2.IMREAD_GRAYSCALE)
-
-    # since FHD images are too heavy, they're simply brutally resized.
-    # The number of matching keypoints  appers to scale according to this factor
-    resize_factor = 0.15
+    img1 = painting
     img1 = resize_image(img1, resize_factor)
 
     kp1, des1 = orb.detectAndCompute(img1, None)
     matches_counts = []
-    for p in dataset:
-        img2 = cv2.imread(p, cv2.IMREAD_GRAYSCALE)
+    for i, p in enumerate(dataset):
+        img2 = p
         img2 = resize_image(img2, resize_factor)
 
         kp2, des2 = orb.detectAndCompute(img2, None)
@@ -55,23 +71,30 @@ def retrieve_painting(painting: str, dataset: list, threshold=0.7, neighbors=2, 
         matches = filter_matches(matches, threshold=threshold)
         matches_counts.append(len(matches))
         if verbose:
-            print("Score between {} and {}: {}".format(
-                painting, p, len(matches)))
-            cv2.imshow("Comparison between {} and {}".format(painting, p),
-                      draw_matches(matches, img1, img2, kp1, kp2))
+            print(f"The image {i + 1} shares {len(matches)} keypoints")
+            cv2.imshow(f"Comparison with image {i + 1}",
+                       draw_matches(matches, img1, img2, kp1, kp2))
 
-    return dataset[np.argmax(matches_counts)]
+    return np.argmax(matches_counts)
 
 
 if __name__ == "__main__":
+    watch = Stopwatch()
+
+    test_image_index = 4
+
     dataset = TEST_PAINTINGS
-    painting = TEST_PAINTINGS[4]
+    painting = TEST_PAINTINGS[test_image_index]
     dataset.remove(painting)
 
-    watch = Stopwatch()
-    verbose = True
+    dataset_images = [cv2.imread(url, 0) for url in TEST_PAINTINGS]
+    painting_image = cv2.imread(painting, 0)
+
+    verbose = False
     watch.start()
-    res = retrieve_painting(painting, dataset, verbose=verbose)
+    res = retrieve_painting(painting_image, dataset_images, verbose=verbose)
     print(watch.stop())
+    print(
+        f"The painting in the image {painting} is also contained in image {dataset[res]}")
     if verbose:
         cv2.waitKey(0)
