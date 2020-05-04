@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 from stopwatch import Stopwatch
-from data_test.standard_samples import TEST_PAINTINGS, RANDOM_PAINTING
+from data_test.standard_samples import TEST_PAINTINGS, RANDOM_PAINTING, PAINTINGS_DB
 
 
 def filter_matches(matches, threshold: float):
@@ -84,11 +84,10 @@ if __name__ == "__main__":
 
     test_image_index = 4
 
-    dataset = TEST_PAINTINGS
+    dataset = PAINTINGS_DB
     painting = TEST_PAINTINGS[test_image_index]
-    dataset.remove(painting)
 
-    dataset_images = [cv2.imread(url, 0) for url in TEST_PAINTINGS]
+    dataset_images = [cv2.imread(url, 0) for url in dataset]
     painting_image = cv2.imread(painting, 0)
 
     verbose = False
