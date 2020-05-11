@@ -7,7 +7,7 @@ from data_test.standard_samples import TEST_PAINTINGS, RANDOM_PAINTING, PAINTING
 def filter_matches(matches, threshold: float):
     length, correct_matches = len(matches), []
     for i, m in enumerate(matches):
-        if i < length - 1 and m.distance < threshold * matches[i+1].distance:
+        if i < length - 1 and m.distance <= threshold * matches[i+1].distance:
             correct_matches.append(m)
     return correct_matches
 
@@ -19,19 +19,12 @@ def draw_matches(matches, img1, img2, kp1, kp2,):
     return img3
 
 
-def get_flann_matcher():
-    FLANN_INDEX_KDTREE = 1
-    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
-    search_params = dict(checks=50)
-    return cv2.FlannBasedMatcher(index_params, search_params)
-
-
 def resize_image(img, resize_factor: float):
     return cv2.resize(img, (int(
         img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)), interpolation=cv2.INTER_AREA)
 
 
-def retrieve_painting(painting, dataset, threshold=0.7, resize_factor=0.10, verbose=False):
+def retrieve_painting(painting, dataset, threshold=0.7, resize_factor=0.30, verbose=False):
     """
     Finds a given painting inside a dataset.
 
@@ -67,6 +60,7 @@ def retrieve_painting(painting, dataset, threshold=0.7, resize_factor=0.10, verb
         img2 = resize_image(img2, resize_factor)
 
         kp2, des2 = orb.detectAndCompute(img2, None)
+
         matches = bf.match(des1, des2,)
         matches = filter_matches(matches, threshold=threshold)
         matches_counts.append(len(matches))
@@ -75,27 +69,27 @@ def retrieve_painting(painting, dataset, threshold=0.7, resize_factor=0.10, verb
             cv2.imshow(f"Comparison with image {i + 1}",
                        draw_matches(matches, img1, img2, kp1, kp2))
 
-    summation = np.sum(matches_counts)
-    return [m / summation for m in matches_counts]
+    return matches_counts
 
 
 if __name__ == "__main__":
     watch = Stopwatch()
 
-    test_image_index = 4
+    test_image_index = 10
+    n_images = 6
 
+    #dataset = [f"C:\\Users\\daniele\\Desktop\\painting_test_image_retrieval\\frame0{i}.png" for i in range(1, n_images + 1)]
     dataset = PAINTINGS_DB
-    painting = TEST_PAINTINGS[test_image_index]
+    painting = "C:\\Users\\daniele\\Desktop\\painting_test_image_retrieval\\original_painting2.png"
 
     dataset_images = [cv2.imread(url, 0) for url in dataset]
     painting_image = cv2.imread(painting, 0)
 
     verbose = False
     watch.start()
-    scores = retrieve_painting(painting_image, dataset_images, verbose=verbose)
+    scores = retrieve_painting(painting_image, dataset_images, verbose=verbose, resize_factor=1, threshold=0.6)
     res = np.argmax(scores)
     print(watch.stop())
-    print(
-        f"The painting in the image {painting} is also contained in image {dataset[res]}")
+    print(f"The painting in the image {painting} is also contained in image {dataset[res]}")
     if verbose:
         cv2.waitKey(0)
