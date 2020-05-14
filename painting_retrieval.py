@@ -84,6 +84,7 @@ def retrieve_painting(painting, dataset, threshold=35, resize_factor=0.10, verbo
     return matches_counts
 
 def best_match(scores):
+    np_scores = np.array(scores)
     top_2 = np_scores.argsort()[-2:][::-1]
     ratio = 'inf'
     if scores[top_2[1]] != 0:
@@ -148,9 +149,4 @@ if __name__ == "__main__":
                 iv.add(target, cmap='bgr', title=f'[{res}] {scores[res]} ratio={ratio}')
         iv.add(img, title='Source', cmap='bgr')
         iv.show()
-    return matches_counts
-
-
-if __name__ == "__main__":
-    watch = Stopwatch()
 
