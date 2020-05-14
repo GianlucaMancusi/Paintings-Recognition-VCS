@@ -25,13 +25,6 @@ def draw_matches(matches, img1, img2, kp1, kp2,):
     return img3
 
 
-def get_flann_matcher():
-    FLANN_INDEX_KDTREE = 1
-    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
-    search_params = dict(checks=50)
-    return cv2.FlannBasedMatcher(index_params, search_params)
-
-
 def resize_image(img, resize_factor: float):
     return cv2.resize(img, (int(
         img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)), interpolation=cv2.INTER_AREA)

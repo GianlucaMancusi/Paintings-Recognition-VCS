@@ -131,3 +131,4 @@ dmypy.json
 
 # IDE
 .vscode/
+yolo/yolov3.weights
