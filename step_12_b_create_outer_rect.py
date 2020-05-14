@@ -34,10 +34,12 @@ def mask(input, source, pad=0, debug=False):
 
 if __name__ == '__main__':
     from pipeline import Pipeline, Function
-    from data_test.standard_samples import RANDOM_PAINTING
+    from data_test.standard_samples import RANDOM_PAINTING, PAINTINGS_DB, TEST_PAINTINGS
     img = cv2.imread(RANDOM_PAINTING)
+    img = cv2.imread('dataset/photos/002/20180206_113600/000090.jpg')
     pipeline = Pipeline()
     pipeline.set_default(5)
     pipeline.append(Function(mask, source=img, pad=100))
     pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
     pipeline.debug_history().show()
+

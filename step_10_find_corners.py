@@ -8,16 +8,19 @@ def intersection(line1, line2):
     Returns closest integer pixel locations.
     See https://stackoverflow.com/a/383527/5087436
     """
-    rho1, theta1 = line1[0]
-    rho2, theta2 = line2[0]
-    A = np.array([
-        [np.cos(theta1), np.sin(theta1)],
-        [np.cos(theta2), np.sin(theta2)]
-    ])
-    b = np.array([[rho1], [rho2]])
-    x0, y0 = np.linalg.solve(A, b)
-    x0, y0 = int(np.round(x0)), int(np.round(y0))
-    return [x0, y0]
+    try:
+        rho1, theta1 = line1[0]
+        rho2, theta2 = line2[0]
+        A = np.array([
+            [np.cos(theta1), np.sin(theta1)],
+            [np.cos(theta2), np.sin(theta2)]
+        ])
+        b = np.array([[rho1], [rho2]])
+        x0, y0 = np.linalg.solve(A, b)
+        x0, y0 = int(np.round(x0)), int(np.round(y0))
+        return [x0, y0]
+    except np.linalg.LinAlgError:
+        return None
 
 def groups_by_angle(lines, k=2):
     """
@@ -88,7 +91,9 @@ def find_all_intersections(groups):
         for line in group:
             for group2 in groups[index + 1:]:
                 for line2 in group2:
-                    points.append(intersection(line, line2))
+                    point = intersection(line, line2)
+                    if not point is None:
+                        points.append(point)
     return points
 
 def find_four_corners(points):
@@ -142,9 +147,11 @@ def find_corners(input, debug=False):
     """
     img, lines = input
     if lines is None:
-        return None
+        return None if not debug else None, None
     groups = groups_by_angle(lines)
     points = find_all_intersections(groups)
+    if len(points) < 4:
+        return None if not debug else None, None
     corners = find_four_corners(points)
     if debug:
         canvas = draw_corners(img, corners)

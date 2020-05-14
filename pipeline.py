@@ -59,7 +59,7 @@ def multiwrapper(input: list, func, debug=False, multi_debug_merge_func=merge_su
 	for single_input in input:
 		if debug:
 			output, output_debug = func(single_input, debug=debug, **kwargs)
-			output_debug_list.append(output_debug)
+			output_debug_list.append(output_debug) if not output_debug is None else None
 		else:
 			output = func(single_input, debug=debug, **kwargs)
 		output_list.append(output)
@@ -172,7 +172,7 @@ class Pipeline:
 if __name__ == "__main__":
 	from step_11_highlight_painting import highlight_paintings
 	# from step_12_b_create_outer_rect import mask as mask_b
-	from data_test.standard_samples import TEST_PAINTINGS
+	from data_test.standard_samples import TEST_PAINTINGS, FISH_EYE, PEOPLE
 
 	# Creando instanziando la classe Pipeline è possibile passare come valori
 	# la lista delle funzioni che verranno eseguite, passando come valore default=True
@@ -185,22 +185,23 @@ if __name__ == "__main__":
 
 	plots = []
 	# ho creato uno script per avere i filename delle immagini che usiamo come test
-	for filename in TEST_PAINTINGS:
-		img = np.array(cv2.imread(filename))
-		# Tramite il comando append è possibile aggiungere una funzione alla pipeline,
-		# in questo caso devo farlo perchè l'ultima funzione prende come source img
-		pipeline.append(Function(highlight_paintings, source=img, pad=100))
-		# tramite il comando run eseguo le funzioni in ordine.
-		# con debug=True per ogni step vengono create delle immagini di debug che poi
-		# possono essere visualizzate in sequenza
-		# con print_time=True vengono stampati i tempi per ogni funzione
-		# filename è opzionale, serve per la stampa
-		out = pipeline.run(img, debug=True, print_time=True, filename=filename)
-		# debug_history() ritorna una classe ImageViewer con la sequenza degli output di ogni funzione
-		plots.append(pipeline.debug_history())
-		iv.add(out, cmap='bgr')
-		# con pop viene tolta l'ultima funzione dalla lista della pipeline
-		pipeline.pop()
+	# for filename in TEST_PAINTINGS:
+	filename = PEOPLE
+	img = np.array(cv2.imread(filename))
+	# Tramite il comando append è possibile aggiungere una funzione alla pipeline,
+	# in questo caso devo farlo perchè l'ultima funzione prende come source img
+	pipeline.append(Function(highlight_paintings, source=img, pad=100))
+	# tramite il comando run eseguo le funzioni in ordine.
+	# con debug=True per ogni step vengono create delle immagini di debug che poi
+	# possono essere visualizzate in sequenza
+	# con print_time=True vengono stampati i tempi per ogni funzione
+	# filename è opzionale, serve per la stampa
+	out = pipeline.run(img, debug=True, print_time=True, filename=filename)
+	# debug_history() ritorna una classe ImageViewer con la sequenza degli output di ogni funzione
+	plots.append(pipeline.debug_history())
+	iv.add(out, cmap='bgr')
+	# con pop viene tolta l'ultima funzione dalla lista della pipeline
+	pipeline.pop()
 
 	for plot in plots:
 		# vengono visualizzati tutti i grafici di debug
