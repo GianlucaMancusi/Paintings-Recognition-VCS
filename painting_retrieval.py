@@ -47,8 +47,8 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
     list
         returns a normalized histogram containing the confindence of each dataset's painting to contain the target painting 
     """
-
     orb = cv2.ORB_create(nfeatures=250)
+    # matcher takes normType, which is set to cv2.NORM_L2 for SIFT and SURF, cv2.NORM_HAMMING for ORB, FAST and BRIEF
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
     img1 = painting
