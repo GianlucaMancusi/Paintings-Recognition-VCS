@@ -149,5 +149,5 @@ if __name__ == "__main__":
                 iv.add(img_sec, cmap='bgr')
                 iv.add(target, cmap='bgr',
                        title=f'[{res}] {scores[res]} diff={diff}')
-        iv.add(img, title='Source', cmap='bgr')
+        iv.add(img, title=painting_path.split('/')[-1], cmap='bgr')
         iv.show()
