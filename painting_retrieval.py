@@ -10,11 +10,6 @@ def filter_matches(matches, threshold=35):
         # if i < length - 1 and m.distance < threshold * matches[i+1].distance:
         if m.distance < threshold:
             correct_matches.append(m)
-    # import matplotlib.pyplot as plt
-    # dist = [m.distance for m in matches]
-    # plt.hist(dist, bins=25)
-    # plt.gca().set(title=f'len(correct_matches)={len(correct_matches)}')
-    # plt.show()
     return correct_matches
 
 
@@ -30,7 +25,7 @@ def resize_image(img, resize_factor: float):
         img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)), interpolation=cv2.INTER_AREA)
 
 
-def retrieve_painting(painting, dataset, threshold=35, resize_factor=0.10, verbose=False):
+def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbose=False, mse=False):
     """
     Finds a given painting inside a dataset.
 
@@ -40,8 +35,8 @@ def retrieve_painting(painting, dataset, threshold=35, resize_factor=0.10, verbo
         image to find inside the dataset
     dataset : list of np.array
         list of the images to analyze
-    threshold: float
-        the minimum diff that a pair of keypoints must have to be considered as a pair of matching points  
+    threshold: int
+        the number of the best keypoints (ordered by distance ASC) to consider  
     resize_factor: float
         images' sizes is resized by this factor to speed up computation 
     verbose: bool
@@ -74,7 +69,8 @@ def retrieve_painting(painting, dataset, threshold=35, resize_factor=0.10, verbo
             #matches = filter_matches(matches, threshold=threshold)
             matches = sorted(matches, key=lambda x: x.distance)
 
-            distances = [m.distance for m in matches[:10]]
+            distances = [(m.distance**2)
+                         if mse else m.distance for m in matches[:threshold]]
             matches_counts.append(sum(distances))
         if verbose:
             print(f"The image {i + 1} shares {len(matches)} keypoints")
@@ -86,6 +82,7 @@ def retrieve_painting(painting, dataset, threshold=35, resize_factor=0.10, verbo
     # return [m / m_np.max() for m in matches_counts]
     return matches_counts
 
+
 def best_match(scores):
     np_scores = np.array(scores)
     top_2 = np_scores.argsort()[:2][::1]
@@ -93,6 +90,7 @@ def best_match(scores):
     if scores[top_2[0]] != 0:
         diff = scores[top_2[1]] - scores[top_2[0]]
     return top_2[0], diff
+
 
 if __name__ == "__main__":
     # from image_viewer import ImageViewer
@@ -125,7 +123,6 @@ if __name__ == "__main__":
     # iv.show()
     # if verbose:
     #     cv2.waitKey(0)
-    
 
     from pipeline import Pipeline, Function
     from image_viewer import ImageViewer
@@ -138,18 +135,19 @@ if __name__ == "__main__":
         pipeline = Pipeline()
         pipeline.set_default(10)
         list_corners = pipeline.run(img, filename=painting_path)
-        list_corners = [ remove_pad(corners, 100) for corners in list_corners ]
+        list_corners = [remove_pad(corners, 100) for corners in list_corners]
         iv = ImageViewer(cols=4)
         iv.remove_axis_values()
         for i, corners in enumerate(list_corners):
             img_sec = four_point_transform(img, np.array(corners))
             if not img_sec is None:
                 # img_gray = cv2.cvtColor(img_sec, cv2.COLOR_BGR2GRAY)
-                scores = retrieve_painting(img_sec, dataset_images, verbose=False, resize_factor=0.8)
+                scores = retrieve_painting(
+                    img_sec, dataset_images, verbose=False, threshold=17, resize_factor=0.8, mse=False)
                 res, diff = best_match(scores)
                 target = dataset_images[res]
                 iv.add(img_sec, cmap='bgr')
-                iv.add(target, cmap='bgr', title=f'[{res}] {scores[res]} diff={diff}')
+                iv.add(target, cmap='bgr',
+                       title=f'[{res}] {scores[res]} diff={diff}')
         iv.add(img, title='Source', cmap='bgr')
         iv.show()
-
