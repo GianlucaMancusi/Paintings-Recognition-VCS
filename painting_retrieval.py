@@ -41,7 +41,7 @@ def retrieve_painting(painting, dataset, threshold=35, resize_factor=0.10, verbo
     dataset : list of np.array
         list of the images to analyze
     threshold: float
-        the minimum ratio that a pair of keypoints must have to be considered as a pair of matching points  
+        the minimum diff that a pair of keypoints must have to be considered as a pair of matching points  
     resize_factor: float
         images' sizes is resized by this factor to speed up computation 
     verbose: bool
@@ -53,7 +53,7 @@ def retrieve_painting(painting, dataset, threshold=35, resize_factor=0.10, verbo
         returns a normalized histogram containing the confindence of each dataset's painting to contain the target painting 
     """
 
-    orb = cv2.ORB_create()
+    orb = cv2.ORB_create(nfeatures=250)
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
     img1 = painting
@@ -71,8 +71,11 @@ def retrieve_painting(painting, dataset, threshold=35, resize_factor=0.10, verbo
             matches_counts.append(0)
         else:
             matches = bf.match(des1, des2)
-            matches = filter_matches(matches, threshold=threshold)
-            matches_counts.append(len(matches))
+            #matches = filter_matches(matches, threshold=threshold)
+            matches = sorted(matches, key=lambda x: x.distance)
+
+            distances = [m.distance for m in matches[:10]]
+            matches_counts.append(sum(distances))
         if verbose:
             print(f"The image {i + 1} shares {len(matches)} keypoints")
             cv2.imshow(f"Comparison with image {i + 1}",
@@ -85,11 +88,11 @@ def retrieve_painting(painting, dataset, threshold=35, resize_factor=0.10, verbo
 
 def best_match(scores):
     np_scores = np.array(scores)
-    top_2 = np_scores.argsort()[-2:][::-1]
-    ratio = 'inf'
-    if scores[top_2[1]] != 0:
-        ratio = scores[top_2[0]] - scores[top_2[1]]
-    return top_2[0], ratio
+    top_2 = np_scores.argsort()[:2][::1]
+    diff = 'inf'
+    if scores[top_2[0]] != 0:
+        diff = scores[top_2[1]] - scores[top_2[0]]
+    return top_2[0], diff
 
 if __name__ == "__main__":
     # from image_viewer import ImageViewer
@@ -143,10 +146,10 @@ if __name__ == "__main__":
             if not img_sec is None:
                 # img_gray = cv2.cvtColor(img_sec, cv2.COLOR_BGR2GRAY)
                 scores = retrieve_painting(img_sec, dataset_images, verbose=False, resize_factor=0.8)
-                res, ratio = best_match(scores)
+                res, diff = best_match(scores)
                 target = dataset_images[res]
                 iv.add(img_sec, cmap='bgr')
-                iv.add(target, cmap='bgr', title=f'[{res}] {scores[res]} ratio={ratio}')
+                iv.add(target, cmap='bgr', title=f'[{res}] {scores[res]} diff={diff}')
         iv.add(img, title='Source', cmap='bgr')
         iv.show()
 
