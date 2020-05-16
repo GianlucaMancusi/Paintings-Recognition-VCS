@@ -9,6 +9,14 @@ import random
 
 
 def mask_largest_segment(input: np.array, color_difference=2, delta=32, scale_percent=1.0, x_samples=64, debug=False):
+    wallmask = _mask_largest_segment(input, color_difference, delta, scale_percent, x_samples)
+
+    if debug:
+        return wallmask, wallmask
+    else:
+        return wallmask
+
+def _mask_largest_segment(im: np.array, color_difference=2, delta=32, scale_percent=1.0, x_samples=64):
     """
     The largest segment will be white and the rest is black
 
@@ -26,8 +34,8 @@ def mask_largest_segment(input: np.array, color_difference=2, delta=32, scale_pe
     x_samples : int
         numer of samples that will be tested orizontally in the image
     """
-    im = input.copy()
-
+    im = im.copy()
+    
     h = im.shape[0]
     w = im.shape[1]
 
@@ -64,13 +72,8 @@ def mask_largest_segment(input: np.array, color_difference=2, delta=32, scale_pe
     lowerBound = tuple([max(x - delta, 0) for x in wallColor])
     upperBound = tuple([min(x + delta, 255) for x in wallColor])
     wallmask = cv2.inRange(im, lowerBound, upperBound)
-
     wallmask = cv2.resize(wallmask, (w, h), interpolation=cv2.INTER_AREA)  # strideeedup
-
-    if debug:
-        return wallmask, wallmask
-    else:
-        return wallmask
+    return wallmask
 
 
 if __name__ == "__main__":

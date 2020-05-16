@@ -3,7 +3,7 @@ import cv2
 import time
 videos_path = 'dataset/videos'
 photos_path = 'dataset/photos'
-occurrence = 15
+occurrence = 45
 
 t0 = time.time()
 
@@ -47,11 +47,11 @@ for subdir, dirs, files in os.walk(videos_path):
 
         print('\tOpened video "{}"'.format(video))
 
-        if not os.path.exists(video_dir):
-            os.makedirs(video_dir)
-            print('\tCreated the directory "{}"'.format(video_dir))
-        else:
-            print('\tThe directory "{}" already exists'.format(video_dir))
+        # if not os.path.exists(video_dir):
+        #     os.makedirs(video_dir)
+        #     print('\tCreated the directory "{}"'.format(video_dir))
+        # else:
+        #     print('\tThe directory "{}" already exists'.format(video_dir))
         
         video_path = os.path.join(subdir, video)
         videoCapture = cv2.VideoCapture(video_path)
@@ -59,18 +59,19 @@ for subdir, dirs, files in os.walk(videos_path):
         count = 0
         saved = 0 
         print('\treading:\t', end='')
-        while success:
-            if count % occurrence == 0 :
-                cv2.imwrite(os.path.join(video_dir, '{:06d}.jpg'.format(count)), image)
-                saved += 1
-                print('x', end='')
-            else:
-                print('.', end='')
+        frame_count = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
+        frame_number = 0
+        while success and frame_number <= frame_count:
+            cv2.imwrite(os.path.join(dst_dir, '{}_{:03d}.jpg'.format(video_name, saved)), image)
+            saved += 1
+            print('x', end='')
+
+            # do stuff
+
+            frame_number += occurrence
+            videoCapture.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
             success, image = videoCapture.read()
-            count += 1
-            if count % 90 == 0:
+            if saved % 90 == 0:
                 print('  {}\n\t\t\t'.format(count), end='')
-        if count % 90 != 0:
-            print('  {}\n'.format(count), end='')
         print('\tSaved frames: {}'.format(saved))
         print('\tElapsed time: {:.2f} s\n\n'.format(time.time() - t0))

@@ -4,6 +4,13 @@ import math
 
 
 def erode_dilate(input: np.array, size=5, erode=True, debug=False):
+    img = _erode_dilate(input, size, erode)
+    if debug:
+        return img, img
+    else:
+        return img
+
+def _erode_dilate(img: np.array, size=5, erode=True):
     """
     Dilates an image by using a specific structuring element
 
@@ -12,28 +19,27 @@ def erode_dilate(input: np.array, size=5, erode=True, debug=False):
     img : np.array
         image where to apply the dilatation
     """
-    img = input
     kernel = np.ones((size, size), np.uint8)
     if erode: 
         img = cv2.erode(img, kernel)
     img = cv2.dilate(img, kernel)
-    if debug:
-        return img, img
-    else:
-        return img
+    return img
 
 def invert(input: np.array, debug=False):
+    result = _invert(input)
+    if debug:
+        return result, result
+    else:
+        return result
+        
+def _invert(img: np.array):
     """
     White becomes Black and viceversa
     ----------
     img : np.array
         image where to apply the inversion
     """
-    result = 255-input
-    if debug:
-        return result, result
-    else:
-        return result
+    return 255-img
 
 def erode_dilate_invert(img:np.array, size=5, erode=True):
     inversion = invert(erode_dilate(img,size, erode))

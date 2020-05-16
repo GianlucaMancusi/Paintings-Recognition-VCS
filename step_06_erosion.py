@@ -14,21 +14,27 @@ import numpy as np
     img
         the cleaned image
 """
-def clean_frames_noise(input, debug=False):
+def _clean_frames_noise(img):
     kernel = np.ones((23, 23), np.uint8)
     # eroded = cv2.erode(img, kernel, iterations=5)
-    opening = cv2.morphologyEx(input, cv2.MORPH_OPEN, kernel, iterations=1)
-    
+    opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=1)
+    return opening
+
+def clean_frames_noise(input, debug=False):
+    opening = _clean_frames_noise(input)    
     if debug:
         return opening, opening
     else:
         return opening
 
-def mask_from_contour(input, debug=False):
-    img, contour = input
+def _mask_from_contour(img, contour):
     canvas = np.zeros_like(img)
     cv2.fillPoly(canvas, pts=[contour], color=(255, 255, 255))
+    return canvas
 
+def mask_from_contour(input, debug=False):
+    img, contour = input
+    canvas = _mask_from_contour(img, contour)
     if debug:
         return canvas, canvas
     else:

@@ -18,12 +18,12 @@ def draw_lines(img, lines, pad):
             cv2.line(canvas, pt1, pt2, color, 3, cv2.LINE_AA)
     return canvas
 
-def hough(input, pad=0, debug=False):
+def _hough(img):
     """
     Return the lines found in the image
     Parameters
     ----------
-    previousOutput : np.array
+    img : np.array
         image in grayscale or black and white form
 
     Returns
@@ -31,7 +31,11 @@ def hough(input, pad=0, debug=False):
     list
         list of all lines found in the image, None if no image is found
     """
-    lines = cv2.HoughLines(input, 1, np.pi / 180, 35, None, 0, 0)
+    lines = cv2.HoughLines(img, 1, np.pi / 180, 35, None, 0, 0)
+    return lines
+
+def hough(input, pad=0, debug=False):
+    lines = _hough(input)
     if debug:
         canvas = draw_lines(input, lines, pad)
         return (input, lines), canvas

@@ -15,8 +15,12 @@ import numpy as np
     img
         the smoothed image
 """
+def _apply_median_filter(img):
+    result = cv2.medianBlur(img, 31)
+    return result
+
 def apply_median_filter(input, debug=False):
-    result = cv2.medianBlur(input, 31)
+    result = _apply_median_filter(input)
     if debug:
         return result, result
     else:

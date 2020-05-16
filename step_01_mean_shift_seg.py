@@ -4,6 +4,14 @@ import math
 from sklearn.cluster import KMeans
 
 def mean_shift_segmentation(input : np.array, spatial_radius=7, color_radius=30, maximum_pyramid_level=1, debug=False):
+    img = _mean_shift_segmentation(input, spatial_radius, color_radius, maximum_pyramid_level)
+
+    if debug:
+        return img, img
+    else:
+        return img
+
+def _mean_shift_segmentation(img : np.array, spatial_radius=7, color_radius=30, maximum_pyramid_level=1):
     """
     This function takes an image and mean-shift parameters and 
     returns a version of the image that has had mean shift 
@@ -24,13 +32,8 @@ def mean_shift_segmentation(input : np.array, spatial_radius=7, color_radius=30,
     maximum_pyramid_level : int
         Maximum level of the pyramid for the segmentation.
     """
-    img = input
     img = cv2.pyrMeanShiftFiltering(img, spatial_radius, color_radius, maximum_pyramid_level)
-
-    if debug:
-        return img, img
-    else:
-        return img
+    return img
 
 def kmeans(img : np.array, n_colors=3):
     arr = img.reshape((-1, 3))

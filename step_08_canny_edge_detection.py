@@ -14,8 +14,12 @@ import numpy as np
     img
         the image's edges
 """
+def _apply_edge_detection(img):
+    result = cv2.Canny(img, 50, 100)
+    return result
+
 def apply_edge_detection(input, debug=False):
-    result = cv2.Canny(input, 50, 100)
+    result = _apply_edge_detection(input)
     if debug:
         kernel = np.ones((5, 5), np.uint8)
         debug_img = cv2.dilate(result, kernel)

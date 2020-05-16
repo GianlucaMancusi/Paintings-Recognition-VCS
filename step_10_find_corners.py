@@ -132,6 +132,17 @@ def draw_corners(img, corners):
     return canvas
 
 def find_corners(input, debug=False):
+    img, lines = input
+    corners = _find_corners(lines)
+    if corners is None:
+        return None if not debug else None, None
+    if debug:
+        canvas = draw_corners(img, corners)
+        return corners, canvas
+    else:
+        return corners
+
+def _find_corners(lines):
     """
     Given a list of lines it finds the 4 corners of the painting
     
@@ -145,19 +156,14 @@ def find_corners(input, debug=False):
     list
         returns a list of the corners points [x, y]
     """
-    img, lines = input
     if lines is None:
-        return None if not debug else None, None
+        return None
     groups = groups_by_angle(lines)
     points = find_all_intersections(groups)
     if len(points) < 4:
-        return None if not debug else None, None
+        return None
     corners = find_four_corners(points)
-    if debug:
-        canvas = draw_corners(img, corners)
-        return corners, canvas
-    else:
-        return corners
+    return corners
 
 
 if __name__ == '__main__':

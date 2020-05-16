@@ -16,17 +16,21 @@ def couldBePainting(img: np.array, bounder, contour, width, height, area_percent
 
 def find_possible_contours(input, min_width=150, min_height=150, min_area_percentage=.6, debug=False):
     img, contours = input
-    painting_contours = []
-    for contour in contours:
-        bounder = cv2.boundingRect(contour)
-        if couldBePainting(img, bounder, contour, min_width, min_height, min_area_percentage):
-            painting_contours.append(contour)
+    painting_contours = _find_possible_contours(img, contours, min_width, min_height, min_area_percentage)
     result = [(img, contour) for contour in painting_contours]
     if debug:
         canvas = color_contours(img.copy(), painting_contours)
         return result, canvas
     else:
         return result
+
+def _find_possible_contours(img, contours, min_width=150, min_height=150, min_area_percentage=.6):
+    painting_contours = []
+    for contour in contours:
+        bounder = cv2.boundingRect(contour)
+        if couldBePainting(img, bounder, contour, min_width, min_height, min_area_percentage):
+            painting_contours.append(contour)
+    return painting_contours
 
 
 if __name__ == "__main__":
