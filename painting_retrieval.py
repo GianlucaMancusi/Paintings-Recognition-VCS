@@ -124,22 +124,18 @@ if __name__ == "__main__":
     # if verbose:
     #     cv2.waitKey(0)
 
-    from pipeline import Pipeline, Function
     from image_viewer import ImageViewer
     from data_test.standard_samples import RANDOM_PAINTING, PAINTINGS_DB, TEST_RETRIEVAL
     from painting_rectification import four_point_transform, remove_pad
-    from painting_retrieval import retrieve_painting, best_match
+    from painting_detection import painting_detection
     dataset_images = [cv2.imread(url) for url in PAINTINGS_DB]
+    
     for painting_path in TEST_RETRIEVAL:
         img = cv2.imread(painting_path)
-        pipeline = Pipeline()
-        pipeline.set_default(10)
-        list_corners = pipeline.run(img, filename=painting_path)
-        list_corners = [remove_pad(corners, 100) for corners in list_corners]
+        painting_contours = painting_detection(img)
         iv = ImageViewer(cols=4)
-        iv.remove_axis_values()
-        for i, corners in enumerate(list_corners):
-            img_sec = four_point_transform(img, np.array(corners))
+        for i, corners in enumerate(painting_contours):
+            img_sec = four_point_transform(img, corners)
             if not img_sec is None:
                 # img_gray = cv2.cvtColor(img_sec, cv2.COLOR_BGR2GRAY)
                 scores = retrieve_painting(

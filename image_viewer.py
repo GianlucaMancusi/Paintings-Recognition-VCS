@@ -4,8 +4,7 @@ import cv2
 import numpy as np
 
 class ImageViewer:
-
-    def __init__(self, img_num=None, cols=4, axis=True):
+    def __init__(self, img_num=None, cols=4, axis=False):
         self.img_num = img_num
         self.cols = cols
         self.axis = axis
@@ -79,6 +78,11 @@ class ImageViewer:
     def show(self):
         self.build()
         plt.show()
+
+def show_me(img, cmap='bgr', title=''):
+    iv = ImageViewer()
+    iv.add(img, title=title, cmap=cmap)
+    iv.show()
 
 if __name__ == "__main__":
     from skimage import data

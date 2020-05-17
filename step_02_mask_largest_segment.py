@@ -71,7 +71,6 @@ def _mask_largest_segment(im: np.array, color_difference=1, scale_percent=1.0, x
                     wallmask = mask[1:-1,1:-1].copy()
                     # cv2.imshow('rect[2]', mask)
                     # cv2.waitKey(0)
-                    print(largest_segment)
     return wallmask
 
 

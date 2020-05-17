@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
-from pipeline import Pipeline
 from image_viewer import ImageViewer
+from painting_detection import painting_detection
 from data_test.standard_samples import TEST_PAINTINGS
 
 def order_points(pts):
+	pts = pts.squeeze()
 	# initialzie a list of coordinates that will be ordered
 	# such that the first entry in the list is the top-left,
 	# the second entry is the top-right, the third is the
@@ -78,8 +79,8 @@ def remove_pad(pts, pad):
 def mean_center(pts):
 	x, y = 0, 0
 	for pt in pts:
-		x += pt[0]
-		y += pt[1]
+		x += pt[0, 0]
+		y += pt[0, 1]
 	x = x // len(pts)
 	y = y // len(pts)
 	return (x, y)
@@ -87,16 +88,13 @@ def mean_center(pts):
 if __name__ == "__main__":
 	for filename in TEST_PAINTINGS:
 		rgbImage = cv2.imread(filename)
-		pipeline = Pipeline()
-		pipeline.set_default(10)
-		list_corners = pipeline.run(rgbImage, filename=filename)
-		list_corners = [ remove_pad(corners, 100) for corners in list_corners ]
+		painting_contours = painting_detection(rgbImage)
 		rgbImage_num = rgbImage.copy()
-		for i, corners in enumerate(list_corners):
+		for i, corners in enumerate(painting_contours):
 			rgbImage_num = cv2.putText(rgbImage_num, str(i + 1), mean_center(corners), cv2.FONT_HERSHEY_SIMPLEX, 5, (0, 0, 255) , 20, cv2.LINE_AA) 
 		iv = ImageViewer()
 		iv.add(rgbImage_num, 'original', cmap='bgr')
-		for i, corners in enumerate(list_corners):
+		for i, corners in enumerate(painting_contours):
 			img = four_point_transform(rgbImage, np.array(corners))
 			if not img is None:
 				iv.add(img, 'painting {}'.format(i + 1), cmap='bgr')
