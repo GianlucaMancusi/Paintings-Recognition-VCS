@@ -45,9 +45,9 @@ def erode_dilate_invert(img:np.array, size=5, erode=True):
     inversion = invert(erode_dilate(img,size, erode))
     return inversion
 
-def add_padding(input, pad=100, color=[0, 0, 0], debug=False):
+def _add_padding(img, pad=100, color=[0, 0, 0]):
     result = cv2.copyMakeBorder(
-            input,
+            img,
             top=pad,
             bottom=pad,
             left=pad,
@@ -55,6 +55,10 @@ def add_padding(input, pad=100, color=[0, 0, 0], debug=False):
             borderType=cv2.BORDER_CONSTANT,
             value=[0, 0, 0]
         )
+    return result
+
+def add_padding(input, pad=100, color=[0, 0, 0], debug=False):
+    result = _add_padding(input, pad, color)
     if debug:
         return result, result
     else:

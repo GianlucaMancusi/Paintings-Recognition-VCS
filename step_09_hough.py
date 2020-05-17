@@ -31,7 +31,7 @@ def _hough(img):
     list
         list of all lines found in the image, None if no image is found
     """
-    lines = cv2.HoughLines(img, 1, np.pi / 180, 35, None, 0, 0)
+    lines = cv2.HoughLines(img, 1, np.pi / 180, 50, None, 0, 0)
     return lines
 
 def hough(input, pad=0, debug=False):

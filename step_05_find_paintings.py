@@ -7,14 +7,14 @@ from step_04_connected_components import color_contours
 def couldBePainting(img: np.array, bounder, contour, width, height, area_percentage):
     bounder_area = bounder[2]*bounder[3]
     # Check that the rect is smaller than the entire image and bigger than a certain size
-    if bounder_area < img.shape[0]*img.shape[1] and bounder[2] >= width and bounder[3] >= height:
+    if bounder_area < img.shape[0]*img.shape[1] and cv2.contourArea(contour) > width*height:
         # Extra to remove floors when programming
         if cv2.contourArea(contour) > bounder_area * area_percentage:
             return True
     return False
 
 
-def find_possible_contours(input, min_width=150, min_height=150, min_area_percentage=.6, debug=False):
+def find_possible_contours(input, min_width=50, min_height=50, min_area_percentage=.6, debug=False):
     img, contours = input
     painting_contours = _find_possible_contours(img, contours, min_width, min_height, min_area_percentage)
     result = [(img, contour) for contour in painting_contours]
@@ -24,7 +24,7 @@ def find_possible_contours(input, min_width=150, min_height=150, min_area_percen
     else:
         return result
 
-def _find_possible_contours(img, contours, min_width=150, min_height=150, min_area_percentage=.6):
+def _find_possible_contours(img, contours, min_width=50, min_height=50, min_area_percentage=.6):
     painting_contours = []
     for contour in contours:
         bounder = cv2.boundingRect(contour)

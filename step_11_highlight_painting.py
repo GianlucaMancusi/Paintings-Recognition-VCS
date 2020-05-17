@@ -29,6 +29,8 @@ def _highlight_paintings(corners_list, source, pad=0, debug=False):
     polyImg = source.copy()
 
     for corners in corners_list:
+        if corners is None:
+            continue
         corners = [(x - pad, y - pad) for x, y in corners]
 
         pts = np.array(corners, np.int32)

@@ -1,6 +1,7 @@
 colorama==0.4.3
 cycler==0.10.0
 decorator==4.4.2
+future==0.18.2
 imageio==2.8.0
 joblib==0.14.1
 kiwisolver==1.2.0
@@ -8,12 +9,17 @@ matplotlib==3.2.1
 networkx==2.4
 numpy==1.18.2
 opencv-contrib-python==4.2.0.34
+opencv-python==4.2.0.34
+pandas==1.0.3
 Pillow==7.0.0
 pyparsing==2.4.7
 python-dateutil==2.8.1
+pytz==2020.1
 PyWavelets==1.1.1
 scikit-image==0.16.2
 scikit-learn==0.22.2.post1
 scipy==1.4.1
 six==1.14.0
 sklearn==0.0
+torch==1.5.0
+torchvision==0.6.0

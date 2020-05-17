@@ -3,8 +3,8 @@ import numpy as np
 import math
 from sklearn.cluster import KMeans
 
-def mean_shift_segmentation(input : np.array, spatial_radius=7, color_radius=30, maximum_pyramid_level=1, debug=False):
-    img = _mean_shift_segmentation(input, spatial_radius, color_radius, maximum_pyramid_level)
+def mean_shift_segmentation(input : np.array, debug=False, **kwargs):
+    img = _mean_shift_segmentation(input, **kwargs)
 
     if debug:
         return img, img

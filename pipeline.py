@@ -64,7 +64,10 @@ def multiwrapper(input: list, func, debug=False, multi_debug_merge_func=merge_su
 			output = func(single_input, debug=debug, **kwargs)
 		output_list.append(output)
 	if debug:
-		output_debug_merged = multi_debug_merge_func(output_debug_list)
+		if len(output_debug_list) > 0:
+			output_debug_merged = multi_debug_merge_func(output_debug_list)
+		else:
+			output_debug_merged = np.zeros((100, 100), np.uint8)
 		return output_list, output_debug_merged
 	else:
 		return output_list
@@ -86,11 +89,11 @@ class Pipeline:
 		self.functions = []
 		if load_first is None or load_first > 0:
 			from step_01_mean_shift_seg import mean_shift_segmentation
-			self.functions.append(Function(mean_shift_segmentation, spatial_radius=7, color_radius=150, maximum_pyramid_level=1))
+			self.functions.append(Function(mean_shift_segmentation))
 
 		if load_first is None or load_first > 1:
 			from step_02_mask_largest_segment import mask_largest_segment
-			self.functions.append(Function(mask_largest_segment, delta=48, x_samples=30))
+			self.functions.append(Function(mask_largest_segment))
 
 		if load_first is None or load_first > 2:
 			from step_03_dilate_invert import erode_dilate, invert, add_padding

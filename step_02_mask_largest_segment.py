@@ -8,15 +8,15 @@ import random
 # https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html?highlight=floodfill
 
 
-def mask_largest_segment(input: np.array, color_difference=2, delta=32, scale_percent=1.0, x_samples=64, debug=False):
-    wallmask = _mask_largest_segment(input, color_difference, delta, scale_percent, x_samples)
+def mask_largest_segment(input: np.array, debug=False, **kwargs):
+    wallmask = _mask_largest_segment(input, **kwargs)
 
     if debug:
         return wallmask, wallmask
     else:
         return wallmask
 
-def _mask_largest_segment(im: np.array, color_difference=2, delta=32, scale_percent=1.0, x_samples=64):
+def _mask_largest_segment(im: np.array, color_difference=1, scale_percent=1.0, x_samples=8, skip_white=False):
     """
     The largest segment will be white and the rest is black
 
@@ -38,49 +38,91 @@ def _mask_largest_segment(im: np.array, color_difference=2, delta=32, scale_perc
     
     h = im.shape[0]
     w = im.shape[1]
-
-    if scale_percent != 1.0:
-        height = int(h * scale_percent)
-        width = int(w * scale_percent)
-        # resize image
-        im = cv2.resize(im, (width, height), interpolation=cv2.INTER_AREA)
+    color_difference = (color_difference,) * 3
     
     # in that way for smaller images the stride will be lower
     stride = int(w / x_samples)
 
     mask = np.zeros((im.shape[0]+2, im.shape[1]+2), dtype=np.uint8)
-    wallColor = np.zeros((1, 1, 1))
+    wallmask = mask
     largest_segment = 0
     for y in range(0, im.shape[0], stride):
         for x in range(0, im.shape[1], stride):
-            if mask[y+1, x+1] == 0:
-                point_colour = (int(im[y, x, 0]), int(im[y, x, 1]), int(im[y, x, 2]))
+            if mask[y+1, x+1] == 0 or skip_white:
+                mask[:] = 0
                 # Fills a connected component with the given color.
                 # loDiff – Maximal lower brightness/color difference between the currently observed pixel and one of its neighbors belonging to the component, or a seed pixel being added to the component.
                 # upDiff – Maximal upper brightness/color difference between the currently observed pixel and one of its neighbors belonging to the component, or a seed pixel being added to the component.
                 # flags=4 means that only the four nearest neighbor pixels (those that share an edge) are considered.
                 #       8 connectivity value means that the eight nearest neighbor pixels (those that share a corner) will be considered
                 rect = cv2.floodFill(
-                    im, mask, (x, y), point_colour, loDiff=color_difference, upDiff=color_difference, flags=4)
-                segment_size = rect[3][2]*rect[3][3]
+                    im.copy(),
+                    mask,
+                    (x, y),
+                    0,
+                    color_difference,
+                    color_difference,
+                    flags=4 | ( 255 << 8 ),
+                    )
+                _, mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+                segment_size = mask.sum()
                 if segment_size > largest_segment:
                     largest_segment = segment_size
-                    wallColor = point_colour
-
-
-    # checks if our image pixel values are the same of the wallColor's pixel values.
-    lowerBound = tuple([max(x - delta, 0) for x in wallColor])
-    upperBound = tuple([min(x + delta, 255) for x in wallColor])
-    wallmask = cv2.inRange(im, lowerBound, upperBound)
-    wallmask = cv2.resize(wallmask, (w, h), interpolation=cv2.INTER_AREA)  # strideeedup
+                    wallmask = mask[1:-1,1:-1].copy()
+                    # cv2.imshow('rect[2]', mask)
+                    # cv2.waitKey(0)
+                    print(largest_segment)
     return wallmask
 
 
 if __name__ == "__main__":
-    from data_test.standard_samples import RANDOM_PAINTING
+    from data_test.standard_samples import RANDOM_PAINTING, TEST_PAINTINGS
     from pipeline import Pipeline
-    img = cv2.imread(RANDOM_PAINTING)
-    pipeline = Pipeline()
-    pipeline.set_default(2)
-    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
-    pipeline.debug_history().show()
+    img = cv2.imread(TEST_PAINTINGS[3])
+    # pipeline = Pipeline()
+    # pipeline.set_default(2)
+    # pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    # pipeline.debug_history().show()
+
+    # if False:
+    #     from image_viewer import ImageViewer
+    #     def nothing(x):
+    #         pass
+    
+    #     scale_percent = 20 # percent of original size
+    #     width = int(img.shape[1] * scale_percent / 100)
+    #     height = int(img.shape[0] * scale_percent / 100)
+    #     dim = (width, height)
+    #     # resize image
+    #     img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+        
+    #     cv2.namedWindow('flood')
+    #     cv2.createTrackbar('loDiff', 'flood', 0, 1000, nothing)
+    #     cv2.createTrackbar('upDiff', 'flood', 0, 1000, nothing)
+    #     cv2.createTrackbar('flags', 'flood', 1, 2, nothing)
+    #     cv2.createTrackbar('x', 'flood', 0, img.shape[1]-1, nothing)
+    #     cv2.createTrackbar('y', 'flood', 0, img.shape[0]-1, nothing)
+
+    #     mask = np.zeros((img.shape[0]+2, img.shape[1]+2), dtype=np.uint8)
+
+    #     while(1):
+    #         k = cv2.waitKey(1) & 0xFF
+    #         if k == 27:
+    #             break
+    #         # get current positions of four trackbars
+    #         loDiff = cv2.getTrackbarPos('loDiff', 'flood')
+    #         upDiff = cv2.getTrackbarPos('upDiff', 'flood')
+    #         flags = cv2.getTrackbarPos('flags', 'flood')
+    #         x = cv2.getTrackbarPos('x', 'flood')
+    #         y = cv2.getTrackbarPos('y', 'flood')
+    #         flags *= 4
+    #         # loDiff /= 100
+    #         # upDiff /= 100
+
+    #         rect = cv2.floodFill(img.copy(), mask, (x, y), (0, 0, 0), loDiff=loDiff, upDiff=upDiff, flags=flags | ( 255 << 8 ))
+    #         cv2.imshow('flood', rect[2])
+    #     cv2.destroyAllWindows()
+    
+    # from magicwand import SelectionWindow
+    # window = SelectionWindow(img)
+    # window.show()
