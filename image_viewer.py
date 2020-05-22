@@ -77,6 +77,9 @@ class ImageViewer:
 
     def show(self):
         self.build()
+        mng = plt.get_current_fig_manager()
+        mng.window.state('zoomed')
+        # mng.full_screen_toggle()
         plt.show()
 
 def show_me(img, cmap='bgr', title=''):
