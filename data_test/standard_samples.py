@@ -1,5 +1,5 @@
-from os import listdir
-from os.path import isfile, join
+from os import listdir, walk
+from os.path import isfile, join, splitext
 import random
 
 dir_path = 'data_test/paintings'
@@ -13,10 +13,17 @@ PAINTINGS_DB = [join(dir_path, f).replace('\\', '/') for f in listdir(dir_path) 
 
 FISH_EYE = 'data_test/fisheye.jpg'
 PEOPLE = 'data_test/persone.jpg'
+PERSPECTIVE = 'data_test/perspective.png'
 
 RANDOM_PAINTING = random.choice(TEST_PAINTINGS)
 
+def get_random_paintings(number):
+    path = 'dataset/photos'
+    all_images = [join(dp, f) for dp, dn, filenames in walk(path) for f in filenames if splitext(f)[1] == '.jpg']
+    return random.sample(all_images, number)
+
 if __name__ == "__main__":
-    print(TEST_PAINTINGS)
-    import pathlib
-    pathlib.Path().absolute()
+    # print(TEST_PAINTINGS)
+    # import pathlib
+    # pathlib.Path().absolute()
+    print(get_random_paintings(10))
