@@ -123,9 +123,10 @@ def find_four_corners(points):
     return corners
 
 def draw_corners(img, corners):
-    kernel = np.ones((5, 5), np.uint8)
-    debug_img = cv2.dilate(img.copy(), kernel)
-    canvas = np.stack((debug_img,)*3, axis=-1)
+    if len(img.shape) < 3:
+        canvas = np.stack((img,)*3, axis=-1)
+    else:
+        canvas = img.copy()
     color = np.random.randint(256, size=3).tolist()
     for point in corners:
         cv2.circle(canvas, (point[0], point[1]), 20, color, -1)
