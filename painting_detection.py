@@ -57,16 +57,16 @@ def painting_detection(img, pad=1, area_perc=0.93):
     return paintings_contours
 
 if __name__ == "__main__":
-    from data_test.standard_samples import TEST_PAINTINGS, PEOPLE, TEST_RETRIEVAL, PERSPECTIVE
+    from data_test.standard_samples import TEST_PAINTINGS, PEOPLE, TEST_RETRIEVAL, PERSPECTIVE, get_random_paintings
     from image_viewer import ImageViewer, show_me
     from stopwatch import Stopwatch
     from step_09_hough import draw_lines
 
     iv = ImageViewer(cols=3)
     watch = Stopwatch()
-    for filename in [PERSPECTIVE,] + TEST_PAINTINGS:
+    for filename in get_random_paintings(10):
         img = cv2.imread(filename)
-        img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        # img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
         watch.start()
         paintigs_contours = painting_detection(img)
         res = _draw_all_contours(paintigs_contours, img)

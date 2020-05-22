@@ -78,6 +78,8 @@ def painting_rectification(img, corners):
 	if math.isnan(whRatio):
 		return None
 	width, height = perspective_dim_ratio(whRatio, tl, tr, br, bl)
+	if width is None or height is None:
+		return None
 	dst = np.array([
 		[0, 0],
 		[height - 1, 0],
@@ -116,7 +118,12 @@ def perspective_dim_ratio(whRatio, tl, tr, br, bl):
 	height_L = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
 	height = max(height_L, height_R)
 	width = height * whRatio
-	return int(height), int(width)
+	try:
+		height, width = int(height), int(width)
+	except:
+		height, width = None, None
+	return  height, width
+	
 
 def perspective_dim(tl, tr, br, bl):	
 	width_B = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
@@ -190,13 +197,13 @@ def mean_center(pts):
 	return (x, y)
 
 if __name__ == "__main__":
-	from data_test.standard_samples import TEST_PAINTINGS, PERSPECTIVE
+	from data_test.standard_samples import TEST_PAINTINGS, PERSPECTIVE, get_random_paintings
 	from image_viewer import show_me
 	from step_10_find_corners import draw_corners
-	rgbImage = cv2.imread(PERSPECTIVE)
-	for filename in TEST_PAINTINGS:
-		# rgbImage = cv2.imread(filename)
-		rgbImage = cv2.rotate(rgbImage, cv2.ROTATE_90_CLOCKWISE)
+	# rgbImage = cv2.imread(PERSPECTIVE)
+	for filename in get_random_paintings(10):
+		rgbImage = cv2.imread(filename)
+		# rgbImage = cv2.rotate(rgbImage, cv2.ROTATE_90_CLOCKWISE)
 		painting_contours = painting_detection(rgbImage, area_perc=0.96)
 		rgbImage_num = rgbImage.copy()
 		for i, corners in enumerate(painting_contours):
