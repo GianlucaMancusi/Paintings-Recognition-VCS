@@ -45,7 +45,7 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
     Returns
     -------
     list
-        returns a normalized histogram containing the confindence of each dataset's painting to contain the target painting 
+        returns a histogram containing the confindence of each dataset's painting to contain the target painting 
     """
     orb = cv2.ORB_create(nfeatures=250)
     # matcher takes normType, which is set to cv2.NORM_L2 for SIFT and SURF, cv2.NORM_HAMMING for ORB, FAST and BRIEF
@@ -77,9 +77,6 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
             cv2.imshow(f"Comparison with image {i + 1}",
                        draw_matches(matches, img1, img2, kp1, kp2))
 
-    summation = np.sum(matches_counts)
-    m_np = np.array(matches_counts)
-    # return [m / m_np.max() for m in matches_counts]
     return matches_counts
 
 

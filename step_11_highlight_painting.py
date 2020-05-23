@@ -27,13 +27,19 @@ def _highlight_paintings(corners_list, source, pad=0, debug=False):
         image in RGB where there is drawn the cotnours are drawn
     """
     polyImg = source.copy()
-    corners = [(x - pad, y - pad) for x, y in corners_list]
+    corners = []
+    for corner in corners_list:
+        if (corner == None):
+            continue
+        bb = [(x - pad, y - pad) for x, y in corner]
+        corners.append(bb)
 
     pts = np.array(corners, np.int32)
-    pts = cv2.convexHull(pts)
-    pts = pts.reshape((-1,1,2))
-
-    cv2.polylines(polyImg, [pts], True, (231, 76, 60), thickness=3)
+    for bb in pts:
+        convexHull = cv2.convexHull(bb)
+        convexHull = convexHull.reshape((-1,1,2))
+        cv2.polylines(polyImg, [convexHull], True, (231, 76, 60), thickness=3)
+    
     return polyImg
 
 def _draw_all_contours(contours, img):
