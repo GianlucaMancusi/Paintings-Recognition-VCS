@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}
+Upload new File
+{% endblock %}
+
+{% block content %}
+<h1>Paintings recognizer</h1>
+Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br><br><br><br>
+<div align="left">
+    <form method="post" enctype="multipart/form-data">
+        <input id="image" type="file" name="file" name="Choose a painting">
+        <input class="btn btn-primary" type="submit" value="Upload">
+    </form>
+</div>
+
+<script>
+</script>
+{% endblock %}
