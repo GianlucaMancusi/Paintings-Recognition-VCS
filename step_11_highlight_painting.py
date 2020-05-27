@@ -29,10 +29,11 @@ def _highlight_paintings(corners_list, source, pad=0, debug=False):
     polyImg = source.copy()
     corners = []
     for corner in corners_list:
-        if (corner == None):
+        try:
+            bb = [(x - pad, y - pad) for x, y in corner]
+            corners.append(bb)
+        except Exception:
             continue
-        bb = [(x - pad, y - pad) for x, y in corner]
-        corners.append(bb)
 
     pts = np.array(corners, np.int32)
     for bb in pts:
