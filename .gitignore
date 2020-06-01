@@ -136,3 +136,8 @@ yolo/yolov3.weights
 # GUI Images
 uploads/
 uploads/images/
+
+# U-Net images
+Pytorch-UNet-master/data_paint
+Pytorch-UNet-master/data
+Pytorch-UNet-master/labelme
