@@ -10,7 +10,7 @@ def erode_dilate(input: np.array, size=5, erode=True, debug=False):
     else:
         return img
 
-def _erode_dilate(img: np.array, size=5, erode=True):
+def _erode_dilate(img: np.array, size=30, erode=True):
     """
     Dilates an image by using a specific structuring element
 
@@ -20,9 +20,9 @@ def _erode_dilate(img: np.array, size=5, erode=True):
         image where to apply the dilatation
     """
     kernel = np.ones((size, size), np.uint8)
+    img = cv2.dilate(img, kernel)
     if erode: 
         img = cv2.erode(img, kernel)
-    img = cv2.dilate(img, kernel)
     return img
 
 def invert(input: np.array, debug=False):
