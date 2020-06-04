@@ -57,5 +57,5 @@ if __name__ == "__main__":
         cv2.imwrite(os.path.join(masks_path, name.replace('.jpg', '.png')), mask)
         cv2.imwrite(os.path.join(imgs_path, name), img)
         l = 128
-        print(f'{i:04d} ' + '#'*int(l * (i + 1)/len(all_imgs))+'-'*int(l * (1 - (i + 1)/len(all_imgs))))
+        print(f'{i:04d} ' + '#'*int(l * (i + 1)/len(all_imgs))+'-'*int(l * (1 - (i + 1)/len(all_imgs))) + f' {(i + 1)*100/len(all_imgs):.0f}%')
 
