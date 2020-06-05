@@ -7,13 +7,24 @@ Upload new File
 {% block content %}
 <h1>Paintings recognizer</h1>
 Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br><br><br><br>
+
+
+
 <div align="left">
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" onsubmit="onSumbit()">
         <input id="image" type="file" name="file" name="Choose a painting">
-        <input class="btn btn-primary" type="submit" value="Upload">
+        <input id="btnSubmit" class="btn btn-primary" type="submit" value="Upload">
+        <div align="center" id="loadingIndicator" class="spinner-border text-primary" role="status" style="visibility: hidden">
+            <span class="sr-only">Loading...</span>
+        </div>
     </form>
 </div>
 
 <script>
+    function onSumbit() {
+        $("#btnSubmit").hide();
+        $("#loadingIndicator").css("visibility", "visible");
+    }
 </script>
+
 {% endblock %}
