@@ -10,7 +10,7 @@ def erode_dilate(input: np.array, size=5, erode=True, debug=False):
     else:
         return img
 
-def _erode_dilate(img: np.array, size=30, erode=True):
+def _erode_dilate(img: np.array, size=15, erode=True):
     """
     Dilates an image by using a specific structuring element
 

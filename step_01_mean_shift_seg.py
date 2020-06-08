@@ -11,7 +11,7 @@ def mean_shift_segmentation(input : np.array, debug=False, **kwargs):
     else:
         return img
 
-def _mean_shift_segmentation(img : np.array, spatial_radius=7, color_radius=30, maximum_pyramid_level=1):
+def _mean_shift_segmentation(img : np.array, spatial_radius=3, color_radius=5, maximum_pyramid_level=3):
     """
     This function takes an image and mean-shift parameters and 
     returns a version of the image that has had mean shift 

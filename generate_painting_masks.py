@@ -16,14 +16,25 @@ from step_12_b_create_outer_rect import _mask, draw_rect, rect_contour
 from image_viewer import show_me, ImageViewer
 import random
 
-def generate_mask(img, pad=1, area_perc=0.93):
+def scale(img, scale_percent):
+    width = int(img.shape[1] * scale_percent)
+    height = int(img.shape[0] * scale_percent)
+    dsize = (width, height)
+    return cv2.resize(img, dsize)
+
+def scale_heght(img, height):
+    return scale(img, height/img.shape[0])
+
+def generate_mask(img, pad=1, area_perc=0.93, img_height=360):
+    orig_shape = (img.shape[1], img.shape[0])
+    img = scale_heght(img, img_height)
     out = _mean_shift_segmentation(img)
     out = _mask_largest_segment(out)
     out = _erode_dilate(out)
     out = _invert(out)
     out = _add_padding(out, pad)
     contours = _find_contours(out)
-    # contours = _find_possible_contours(out, contours, min_area_percentage=0.7, min_width=150, min_height=100)
+    # contours = _find_possible_contours(out, contours, min_area_percentage=min_area_percentage, min_width=min_width, min_height=min_height)
     paintings_contours = []
     canvas = np.zeros_like(out)
     for contour in contours:
@@ -32,7 +43,7 @@ def generate_mask(img, pad=1, area_perc=0.93):
         for_out = _apply_median_filter(for_out)
         # for_out = _apply_edge_detection(for_out)
         canvas += for_out
-    return canvas[pad:-pad, pad:-pad]
+    return cv2.resize(canvas[pad:-pad, pad:-pad], orig_shape)
 
 if __name__ == "__main__":
     video_path = 'dataset/photos'
@@ -57,5 +68,5 @@ if __name__ == "__main__":
         cv2.imwrite(os.path.join(masks_path, name.replace('.jpg', '.png')), mask)
         cv2.imwrite(os.path.join(imgs_path, name), img)
         l = 128
-        print(f'{i:04d} ' + '#'*int(l * (i + 1)/len(all_imgs))+'-'*int(l * (1 - (i + 1)/len(all_imgs))) + f' {(i + 1)*100/len(all_imgs):.0f}%')
+        print(f'{i:04d} ' + '#'*int(l * (i + 1)/len(all_imgs))+'-'*int(l * (1 - (i + 1)/len(all_imgs))) + f' {(i + 1)*100/len(all_imgs):.0f}%', end='\r')
 

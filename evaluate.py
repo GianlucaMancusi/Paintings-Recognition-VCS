@@ -9,9 +9,16 @@ from stopwatch import Stopwatch
 import multiprocessing as mp
 import xmltodict
 import random
+import json
+from datetime import datetime
+import sys
 
 def calc_dice(paint, mask):
-    return np.sum(paint[mask > 0]) * 2.0 / (np.sum(paint) + np.sum(mask))
+    sum_tot = np.sum(paint) + np.sum(mask)
+    if sum_tot == 0:
+        return 1
+    else:
+        return np.sum(paint[mask > 0]) * 2.0 / sum_tot
 
 def xml2img(filename):
     with open(filename) as fd:
@@ -55,6 +62,8 @@ def evaluate(function, test_perc=1.0, seed=0, **kwargs):
     all_masks = all_files_in(masks_path)
 
     dice_vals = []
+    dice_tot = 0
+    filenames = []
 
     if test_perc == 1.0:
         pairs = list(zip(all_imgs, all_masks))
@@ -63,19 +72,23 @@ def evaluate(function, test_perc=1.0, seed=0, **kwargs):
 
     watch = Stopwatch()
     for i, (paint_path, mask_path) in enumerate(pairs):
+        sys.stdout.write("\033[K")
         filename = os.path.basename(paint_path)
         mask = xml2img(mask_path)
-        if mask is None or mask.max() == 0:
-            print(f'[{i + 1}/{len(pairs)}]\tSkipped "{filename}"')
+        if mask is None:
+            print(f'  [{i + 1}/{len(pairs)}] ERROR "{filename}"', end='\r')
             continue
         paint = cv2.imread(paint_path)
         out = function(paint, **kwargs)
         dice = calc_dice(out, mask)
+        dice_tot += dice
         dice_vals.append(dice)
-        print(f'[{i + 1}/{len(pairs)}] dice={dice:0.4f} of "{filename}"')
-    time = watch.stop()
+        filenames.append(filename)
+        print(f'  [{i + 1}/{len(pairs)}] dice_mean={dice_tot/len(dice_vals):0.4f} time={watch.total():.0f}s dice={dice:0.4f} of "{filename}"', end='\r')
+    sys.stdout.write("\033[K")
+    time = watch.total()
     mean = sum(dice_vals) / len(dice_vals)
-    return dice_vals, mean, time
+    return dice_vals, filenames, mean, time
 
 if __name__ == "__main__":
     eval_values = []
@@ -86,16 +99,20 @@ if __name__ == "__main__":
         {},
     ]
 
+    test_perc = 1
     for kwargs in test_args:
-        dice_vals, mean, time = evaluate(generate_mask, test_perc=0.3, **kwargs)
+        dice_vals, filenames, mean, time = evaluate(generate_mask, test_perc=test_perc, **kwargs)
         eval_values.append(dice_vals)
         eval_mean.append(mean)
         eval_time.append(time)
-        print(f'mean={mean:0.04f} time={time:.02f}s kwargs={kwargs}')
-
-    for dice_vals, mean, time in zip(eval_values, eval_mean, eval_time):
-        plt.plot(dice_vals, label='dice')
-        plt.axhline(y=mean, color='r', ls='--', label='mean')
-        plt.title(f'mean: {mean:0.04f}')
-        plt.legend()
-        plt.show()
+        with open(f'evaluations/evaluation_{datetime.now().strftime("%m_%d_%H_%M_%S")}.json', 'w') as f:  # writing JSON object
+            json.dump({
+                'dice_vals': dice_vals,
+                'filenames': filenames,
+                'mean': mean,
+                'time': time,
+                'kwargs': kwargs,
+                'test_perc': test_perc,
+            }, f)
+        info = f'mean={mean:0.04f} time={time:.02f}s kwargs={kwargs}'
+        print(f'{info}')

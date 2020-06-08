@@ -16,7 +16,7 @@ def mask_largest_segment(input: np.array, debug=False, **kwargs):
     else:
         return wallmask
 
-def _mask_largest_segment(im: np.array, color_difference=1, scale_percent=1.0, x_samples=8, skip_white=False):
+def _mask_largest_segment(im: np.array, color_difference=2, scale_percent=1.0, x_samples=2, no_skip_white=False):
     """
     The largest segment will be white and the rest is black
 
@@ -44,11 +44,11 @@ def _mask_largest_segment(im: np.array, color_difference=1, scale_percent=1.0, x
     stride = int(w / x_samples)
 
     mask = np.zeros((im.shape[0]+2, im.shape[1]+2), dtype=np.uint8)
-    wallmask = mask
+    wallmask = mask[1:-1,1:-1].copy()
     largest_segment = 0
     for y in range(0, im.shape[0], stride):
         for x in range(0, im.shape[1], stride):
-            if mask[y+1, x+1] == 0 or skip_white:
+            if mask[y+1, x+1] == 0 or no_skip_white:
                 mask[:] = 0
                 # Fills a connected component with the given color.
                 # loDiff – Maximal lower brightness/color difference between the currently observed pixel and one of its neighbors belonging to the component, or a seed pixel being added to the component.
