@@ -39,31 +39,49 @@ def allowed_video_file(filename):
 def compute_video(video_file, print_time=True):
     import cv2
     cap = cv2.VideoCapture(video_file)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    out_path = os.path.join(app.config['VIDEO_OUTPUTS_FOLDER'], "output.mp4")
+
+    fps_input = cap.get(cv2.CAP_PROP_FPS)
+    if fps_input < 15:
+        # this is because sometimes cv2.CAP_PROP_FPS doesn't work properly
+        fps_input = 15
+
+    # initializing the output
+    _, video_filename = os.path.split(video_file)
+    out_path = os.path.join(app.config['VIDEO_OUTPUTS_FOLDER'], video_filename)
     out = None
 
+    # reading the input video
     while cap.isOpened():
         ret, frame = cap.read()
 
+        if frame is None:
+            break
+
         stopwatch = Stopwatch()
+
+        # processing the frame
         labeler = PaintingLabeler(
             image=frame, dataset=paintings_dataset, metadata_repository="dataset/data.csv")
         labeled = labeler.transform()
+        # end processing the frame
 
         t = stopwatch.round()
+
         if print_time:
             fps = 1 / t if t != 0 else 999
             print(f"New frame computed: {t}s, {fps}fps")
 
         if labeled is None:
             break
+
         height, width, layers = labeled.shape
         size = (width, height)
 
+        # if this is the first read we can set the output "size" and then use the same VideoWriter instance
         if out is None:
-            out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
+            out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*'DIVX'), fps_input, size)
 
+        # write the labeled (output) to the output video
         out.write(labeled)
 
     cap.release()
