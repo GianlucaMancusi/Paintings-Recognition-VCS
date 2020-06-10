@@ -12,10 +12,10 @@ import random
 
 
 class PaintingLabeler:
-    def __init__(self, image_url: str, dataset: list, metadata_repository: str):
+    def __init__(self, image, dataset: list, metadata_repository: str, image_url=None):
         super().__init__()
         self.image_url = image_url
-        self.image = cv2.imread(image_url)
+        self.image = image if image_url == None else cv2.imread(image_url)
         self.dataset = dataset
         self.metadata_repository = InfoTable(metadata_repository)
 
