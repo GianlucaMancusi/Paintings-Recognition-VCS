@@ -63,9 +63,9 @@ class PaintingLabeler:
 
                     label_x = x_low
                     label_y = y_low if i % 2 == 0 else y_high
-                    cv2.putText(out, info["Title"], (abs(label_x), abs(label_y)),
+                    cv2.putText(out, info["Title"], (label_x, label_y),
                                 self.font, 1, (255, 0, 0), 2, cv2.LINE_AA)
-            except Exception as e:
+            except AttributeError as e:
                 # print(e)
                 continue
 

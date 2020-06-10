@@ -73,7 +73,7 @@ def retrieve_painting(painting, dataset, threshold=30, resize_factor=1, verbose=
             # al posto di calcolarlo ogni volta si potrebbe salvare des2 da qualche parte
 
             kp2, des2 = orb.detectAndCompute(img2, None)
-            size = img.shape[0], img.shape[1]
+            size = img2.shape[0], img2.shape[1]
             db_descriptors.append(des2)
         else:
             des2 = db_descriptors[i]
