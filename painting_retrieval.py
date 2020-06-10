@@ -47,6 +47,9 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
     list
         returns a histogram containing the confindence of each dataset's painting to contain the target painting 
     """
+
+    db_des_filename = "db_descriptors.npy"
+
     orb = cv2.ORB_create(nfeatures=250)
     # matcher takes normType, which is set to cv2.NORM_L2 for SIFT and SURF, cv2.NORM_HAMMING for ORB, FAST and BRIEF
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
@@ -56,12 +59,34 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
 
     kp1, des1 = orb.detectAndCompute(img1, None)
     matches_counts = []
-    for i, p in enumerate(dataset):
-        img2 = p
-        img2 = resize_image(img2, resize_factor)
 
-        # al posto di calcolarlo ogni volta si potrebbe salvare des2 da qualche parte
-        kp2, des2 = orb.detectAndCompute(img2, None)
+    db_descriptors = []
+    des_precomputed = False
+    try:
+        db_descriptors = np.load(db_des_filename, allow_pickle=True)
+        des_precomputed = True
+
+        if db_descriptors.shape[0] != len(dataset):
+            des_precomputed = False
+        
+    except IOError:
+        print("No descriptors found, we will generate it")
+    except ValueError:
+        print("Cannot load the descriptors file.")
+
+    for i, p in enumerate(dataset):
+        des2 = None
+        if not des_precomputed:
+            img2 = p
+            img2 = resize_image(img2, resize_factor)
+
+            # al posto di calcolarlo ogni volta si potrebbe salvare des2 da qualche parte
+
+            kp2, des2 = orb.detectAndCompute(img2, None)
+            db_descriptors.append(des2)
+        else:
+            des2 = db_descriptors[i]
+
         if des2 is None:
             matches_counts.append(0)
         else:
@@ -76,6 +101,9 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
             print(f"The image {i + 1} shares {len(matches)} keypoints")
             cv2.imshow(f"Comparison with image {i + 1}",
                        draw_matches(matches, img1, img2, kp1, kp2))
+
+    if not des_precomputed:
+        np.save(db_des_filename, db_descriptors)
 
     return matches_counts
 
@@ -126,7 +154,7 @@ if __name__ == "__main__":
     from painting_rectification import four_point_transform, remove_pad
     from painting_detection import painting_detection
     dataset_images = [cv2.imread(url) for url in PAINTINGS_DB]
-    
+
     for painting_path in TEST_RETRIEVAL:
         img = cv2.imread(painting_path)
         painting_contours = painting_detection(img)

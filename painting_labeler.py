@@ -34,9 +34,13 @@ class PaintingLabeler:
         if self.image is None or self.dataset is None or self.metadata_repository is None:
             return None
 
-        out = self.detection_pipeline.run(self.image, debug=False,
-                           print_time=False, filename=self.image_url)
+        #out = self.detection_pipeline.run(self.image, debug=False,
+        #                   print_time=False, filename=self.image_url)
+        #painting_contours = painting_detection(self.image)
+        # out = self.detection_pipeline.run(self.image, debug=False, print_time=False, filename=self.image_url)
+        from step_11_highlight_painting import _draw_all_contours
         painting_contours = painting_detection(self.image)
+        out = _draw_all_contours(painting_contours, self.image)
 
         infos = []
         for i, corners in enumerate(painting_contours):

@@ -72,9 +72,12 @@ def compute_video(video_file, print_time=True):
 
 
 @app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['IMAGE_OUTPUTS_FOLDER'],
-                               filename)
+def uploaded_image(filename):
+    return send_from_directory(app.config['IMAGE_OUTPUTS_FOLDER'], filename)
+
+@app.route('/uploads/<filename>')
+def uploaded_video(filename):
+    return send_from_directory(app.config['VIDEO_OUTPUTS_FOLDER'], filename)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -102,7 +105,7 @@ def upload_file():
                 labeled_image_url = os.path.join(
                     app.config['IMAGE_OUTPUTS_FOLDER'], filename)
                 cv2.imwrite(labeled_image_url, labeled)
-                return redirect(url_for('uploaded_file', filename=filename))
+                return redirect(url_for('uploaded_image', filename=filename))
 
             elif allowed_video_file(file.filename):
                 # VIDEO PIPELINE
@@ -111,8 +114,9 @@ def upload_file():
                     app.config['VIDEOS_UPLOAD_FOLDER'], filename)
                 file.save(original_video_url)
 
-                labeled_image_url = compute_video(original_video_url)
-                return redirect(url_for('uploaded_file', filename=labeled_image_url))
+                video_url = compute_video(original_video_url)
+                _, video_filename = os.path.split(video_url)
+                return redirect(url_for('uploaded_video', filename=video_filename))
     return render_template("index.html")
 
 
