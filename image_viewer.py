@@ -78,7 +78,10 @@ class ImageViewer:
     def show(self):
         self.build()
         mng = plt.get_current_fig_manager()
-        mng.window.state('zoomed')
+        try:
+            mng.window.state('zoomed')
+        except AttributeError:
+            mng.window.showMaximized()
         # mng.full_screen_toggle()
         plt.show()
 

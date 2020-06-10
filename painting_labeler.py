@@ -35,7 +35,7 @@ class PaintingLabeler:
         if self.image is None or self.dataset is None or self.metadata_repository is None:
             return None
 
-        #out = self.detection_pipeline.run(self.image, debug=False,
+        # out = self.detection_pipeline.run(self.image, debug=False,
         #                   print_time=False, filename=self.image_url)
         #painting_contours = painting_detection(self.image)
         # out = self.detection_pipeline.run(self.image, debug=False, print_time=False, filename=self.image_url)
@@ -55,24 +55,25 @@ class PaintingLabeler:
                 paint = self.image[y_low: y_high, x_low: x_high, :]
                 image_copy = self.image.copy()
                 img_sec = four_point_transform(image_copy, corners)
-                scores = retrieve_painting(
-                    img_sec, self.dataset, resize_factor=0.8, mse=True)
-                info = self.metadata_repository.painting_info(
-                    np.argmin(scores))
-                infos.append(info)
+                scores = retrieve_painting(img_sec, self.dataset)
+                res, diff = best_match(scores)
+                if diff > 50:
+                    info = self.metadata_repository.painting_info(np.argmin(scores))
+                    infos.append(info)
 
-                label_x = x_low
-                label_y = y_low if i % 2 == 0 else y_high
-                cv2.putText(out, info["Title"], (abs(label_x), abs(label_y)),
-                            self.font, 1, (255, 0, 0), 2, cv2.LINE_AA)
+                    label_x = x_low
+                    label_y = y_low if i % 2 == 0 else y_high
+                    cv2.putText(out, info["Title"], (abs(label_x), abs(label_y)),
+                                self.font, 1, (255, 0, 0), 2, cv2.LINE_AA)
             except Exception as e:
-                #print(e)
+                # print(e)
                 continue
 
         return out
 
     def fit_transform(self, image_url: str, dataset: list, metadata_repository: str):
-        self.fit(image_url=image_url, dataset=dataset, metadata_repository=metadata_repository)
+        self.fit(image_url=image_url, dataset=dataset,
+                 metadata_repository=metadata_repository)
         return self.transform()
 
 
@@ -87,7 +88,7 @@ if __name__ == "__main__":
         url) for url in PAINTINGS_DB], metadata_repository='dataset/data.csv')
 
     iv = ImageViewer(cols=3)
- 
+
     out = labeler.transform()
     iv.add(out, cmap="bgr")
     iv.show()

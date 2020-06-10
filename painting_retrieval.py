@@ -26,7 +26,7 @@ def resize_image(img, resize_factor: float):
 
 db_descriptors = []
 db_descriptors_allocated = False
-def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbose=False, mse=False):
+def retrieve_painting(painting, dataset, threshold=30, resize_factor=1, verbose=False, mse=False):
     """
     Finds a given painting inside a dataset.
 
@@ -58,7 +58,8 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
     img1 = painting
-    img1 = resize_image(img1, resize_factor)
+    #img1 = resize_image(img1, resize_factor)
+    img1 = cv2.resize(img1.copy(), (400, 400))
 
     kp1, des1 = orb.detectAndCompute(img1, None)
     matches_counts = []
@@ -67,14 +68,16 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
         des2 = None
         if not db_descriptors_allocated:
             img2 = p
-            img2 = resize_image(img2, resize_factor)
-
+            #img2 = resize_image(img2, resize_factor)
+            img2 = cv2.resize(img2.copy(), (400,400))
             # al posto di calcolarlo ogni volta si potrebbe salvare des2 da qualche parte
 
             kp2, des2 = orb.detectAndCompute(img2, None)
+            size = img.shape[0], img.shape[1]
             db_descriptors.append(des2)
         else:
             des2 = db_descriptors[i]
+            size = db_descriptors[i]
 
         if des2 is None:
             matches_counts.append(0)
@@ -83,9 +86,9 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
             #matches = filter_matches(matches, threshold=threshold)
             matches = sorted(matches, key=lambda x: x.distance)
 
-            distances = [(m.distance**2)
-                         if mse else m.distance for m in matches[:threshold]]
-            matches_counts.append(sum(distances))
+            #distances = [(m.distance**2) if mse else m.distance for m in matches[:threshold]]
+            distances = [m.distance**2 for m in matches[:threshold]]
+            matches_counts.append(np.mean(distances))
         if verbose:
             print(f"The image {i + 1} shares {len(matches)} keypoints")
             cv2.imshow(f"Comparison with image {i + 1}",
@@ -153,7 +156,7 @@ if __name__ == "__main__":
             if not img_sec is None:
                 # img_gray = cv2.cvtColor(img_sec, cv2.COLOR_BGR2GRAY)
                 scores = retrieve_painting(
-                    img_sec, dataset_images, verbose=False, threshold=17, resize_factor=0.8, mse=False)
+                    img_sec, dataset_images, verbose=False, threshold=30, resize_factor=1, mse=False)
                 res, diff = best_match(scores)
                 target = dataset_images[res]
                 iv.add(img_sec, cmap='bgr')
