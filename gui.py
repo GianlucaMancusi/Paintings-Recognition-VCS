@@ -39,8 +39,10 @@ def allowed_video_file(filename):
 def compute_video(video_file, print_time=True):
     import cv2
     cap = cv2.VideoCapture(video_file)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    out_path = os.path.join(app.config['VIDEO_OUTPUTS_FOLDER'], "output.mp4")
+    out = None
 
-    frames = []
     while cap.isOpened():
         ret, frame = cap.read()
 
@@ -59,14 +61,12 @@ def compute_video(video_file, print_time=True):
         height, width, layers = labeled.shape
         size = (width, height)
 
-        frames.append(labeled)
+        if out is None:
+            out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
+
+        out.write(labeled)
 
     cap.release()
-    out_path = os.path.join(app.config['VIDEO_OUTPUTS_FOLDER'], "output.mp4")
-    out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
-
-    for i in range(len(frames)):
-        out.write(frames[i])
     out.release()
     return out_path
 
