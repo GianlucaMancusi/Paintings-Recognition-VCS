@@ -30,9 +30,11 @@ def allowed_image_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
+
 def allowed_video_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEO_EXTENSIONS
+
 
 def compute_video(video_file, print_time=True):
     import cv2
@@ -40,10 +42,11 @@ def compute_video(video_file, print_time=True):
 
     frames = []
     while cap.isOpened():
-        ret,frame = cap.read()
+        ret, frame = cap.read()
 
         stopwatch = Stopwatch()
-        labeler = PaintingLabeler(image=frame, dataset=paintings_dataset, metadata_repository="dataset/data.csv")
+        labeler = PaintingLabeler(
+            image=frame, dataset=paintings_dataset, metadata_repository="dataset/data.csv")
         labeled = labeler.transform()
 
         t = stopwatch.round()
@@ -54,14 +57,14 @@ def compute_video(video_file, print_time=True):
         if labeled is None:
             break
         height, width, layers = labeled.shape
-        size = (width,height)
+        size = (width, height)
 
         frames.append(labeled)
 
     cap.release()
     out_path = os.path.join(app.config['VIDEO_OUTPUTS_FOLDER'], "output.mp4")
-    out = cv2.VideoWriter(out_path,cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
- 
+    out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
+
     for i in range(len(frames)):
         out.write(frames[i])
     out.release()
@@ -88,28 +91,54 @@ def upload_file():
             if allowed_image_file(file.filename):
                 # IMAGES PIPELINE
                 filename = secure_filename(file.filename)
-                original_image_url = os.path.join(app.config['IMAGES_UPLOAD_FOLDER'], filename)
+                original_image_url = os.path.join(
+                    app.config['IMAGES_UPLOAD_FOLDER'], filename)
                 file.save(original_image_url)
 
                 labeler = PaintingLabeler(
                     image_url=original_image_url, dataset=paintings_dataset, metadata_repository="dataset/data.csv")
                 labeled = labeler.transform()
 
-                labeled_image_url = os.path.join(app.config['IMAGE_OUTPUTS_FOLDER'], filename)
+                labeled_image_url = os.path.join(
+                    app.config['IMAGE_OUTPUTS_FOLDER'], filename)
                 cv2.imwrite(labeled_image_url, labeled)
                 return redirect(url_for('uploaded_file', filename=filename))
 
             elif allowed_video_file(file.filename):
                 # VIDEO PIPELINE
                 filename = secure_filename(file.filename)
-                original_video_url = os.path.join(app.config['VIDEOS_UPLOAD_FOLDER'], filename)
+                original_video_url = os.path.join(
+                    app.config['VIDEOS_UPLOAD_FOLDER'], filename)
                 file.save(original_video_url)
-                
+
                 labeled_image_url = compute_video(original_video_url)
                 return redirect(url_for('uploaded_file', filename=labeled_image_url))
     return render_template("index.html")
 
 
+def create_dirs():
+    from os import path
+    img_path = "uploads\\images\\outputs"
+    vid_path = "uploads\\videos\\outputs"
+
+    if path.exists(img_path) or path.exists(vid_path):
+        return
+
+    try:
+        os.makedirs(img_path)
+    except OSError:
+        print("Creation of the directory %s failed" % img_path)
+    else:
+        print("Successfully created the directory %s " % img_path)
+    try:
+        os.makedirs(vid_path)
+    except OSError:
+        print("Creation of the directory %s failed" % vid_path)
+    else:
+        print("Successfully created the directory %s " % vid_path)
+
+
 if __name__ == "__main__":
+    create_dirs()
     paintings_dataset = [cv2.imread(url) for url in PAINTINGS_DB]
     app.run(host="127.0.0.1", port=5000, debug=True)
