@@ -89,11 +89,11 @@ def compute_video(video_file, print_time=True):
     return out_path
 
 
-@app.route('/uploads/<filename>')
+@app.route('/uploads_image/<filename>')
 def uploaded_image(filename):
     return send_from_directory(app.config['IMAGE_OUTPUTS_FOLDER'], filename)
 
-@app.route('/uploads/<filename>')
+@app.route('/uploads_video/<filename>')
 def uploaded_video(filename):
     return send_from_directory(app.config['VIDEO_OUTPUTS_FOLDER'], filename)
 
