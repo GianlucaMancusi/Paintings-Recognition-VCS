@@ -24,7 +24,8 @@ def resize_image(img, resize_factor: float):
     return cv2.resize(img, (int(
         img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)), interpolation=cv2.INTER_AREA)
 
-
+db_descriptors = []
+db_descriptors_allocated = False
 def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbose=False, mse=False):
     """
     Finds a given painting inside a dataset.
@@ -49,6 +50,8 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
     """
 
     db_des_filename = "db_descriptors.npy"
+    global db_descriptors
+    global db_descriptors_allocated
 
     orb = cv2.ORB_create(nfeatures=250)
     # matcher takes normType, which is set to cv2.NORM_L2 for SIFT and SURF, cv2.NORM_HAMMING for ORB, FAST and BRIEF
@@ -60,23 +63,9 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
     kp1, des1 = orb.detectAndCompute(img1, None)
     matches_counts = []
 
-    db_descriptors = []
-    des_precomputed = False
-    try:
-        db_descriptors = np.load(db_des_filename, allow_pickle=True)
-        des_precomputed = True
-
-        if db_descriptors.shape[0] != len(dataset):
-            des_precomputed = False
-        
-    except IOError:
-        print("No descriptors found, we will generate it")
-    except ValueError:
-        print("Cannot load the descriptors file.")
-
     for i, p in enumerate(dataset):
         des2 = None
-        if not des_precomputed:
+        if not db_descriptors_allocated:
             img2 = p
             img2 = resize_image(img2, resize_factor)
 
@@ -102,8 +91,8 @@ def retrieve_painting(painting, dataset, threshold=10, resize_factor=0.10, verbo
             cv2.imshow(f"Comparison with image {i + 1}",
                        draw_matches(matches, img1, img2, kp1, kp2))
 
-    if not des_precomputed:
-        np.save(db_des_filename, db_descriptors)
+    if not db_descriptors_allocated:
+        db_descriptors_allocated = True
 
     return matches_counts
 

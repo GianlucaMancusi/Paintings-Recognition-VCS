@@ -12,8 +12,9 @@ import random
 
 
 class PaintingLabeler:
-    def __init__(self, image, dataset: list, metadata_repository: str, image_url=None):
+    def __init__(self, dataset: list, metadata_repository: str, image=None, image_url=None):
         super().__init__()
+        assert(image is not None or image_url is not None)
         self.image_url = image_url
         self.image = image if image_url == None else cv2.imread(image_url)
         self.dataset = dataset
@@ -62,9 +63,10 @@ class PaintingLabeler:
 
                 label_x = x_low
                 label_y = y_low if i % 2 == 0 else y_high
-                cv2.putText(out, info["Title"], (label_x, label_y),
+                cv2.putText(out, info["Title"], (abs(label_x), abs(label_y)),
                             self.font, 1, (255, 0, 0), 2, cv2.LINE_AA)
-            except Exception:
+            except Exception as e:
+                #print(e)
                 continue
 
         return out
