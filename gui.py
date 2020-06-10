@@ -59,7 +59,7 @@ def compute_video(video_file, print_time=True):
         frames.append(labeled)
 
     cap.release()
-    out_path = os.path.join(app.config['VIDEO_OUTPUTS_FOLDER'], video_file)
+    out_path = os.path.join(app.config['VIDEO_OUTPUTS_FOLDER'], "output.mp4")
     out = cv2.VideoWriter(out_path,cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
  
     for i in range(len(frames)):
@@ -102,11 +102,11 @@ def upload_file():
             elif allowed_video_file(file.filename):
                 # VIDEO PIPELINE
                 filename = secure_filename(file.filename)
-                original_video_url = os.path.join(app.config['IMAGES_UPLOAD_FOLDER'], filename)
+                original_video_url = os.path.join(app.config['VIDEOS_UPLOAD_FOLDER'], filename)
                 file.save(original_video_url)
                 
                 labeled_image_url = compute_video(original_video_url)
-                return redirect(url_for('uploaded_file', filename=original_video_url))
+                return redirect(url_for('uploaded_file', filename=labeled_image_url))
     return render_template("index.html")
 
 
