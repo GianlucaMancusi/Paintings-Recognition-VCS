@@ -84,7 +84,7 @@ class Pipeline:
 	
 	def set_default(self, load_first=None):
 		"""
-		load_first definisce quanti step caricare, se lasciato None li carica tutti
+		load_first defines how many steps to load, if left None loads them all
 		"""
 		self.functions = []
 		if load_first is None or load_first > 0:
