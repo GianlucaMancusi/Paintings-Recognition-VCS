@@ -14,6 +14,9 @@ TEST_DISTORTION = [join(dir_path, f).replace('\\', '/') for f in listdir(dir_pat
 dir_path = 'dataset/paintings_db'
 PAINTINGS_DB = [join(dir_path, f).replace('\\', '/') for f in listdir(dir_path) if isfile(join(dir_path, f))]
 
+dir_path = 'rooms'
+ROOMS = [join(dir_path, f).replace('\\', '/') for f in listdir(dir_path) if isfile(join(dir_path, f))]
+
 try:
     path = 'dataset/photos'
     ALL_PAINTINGS = [join(dp, f) for dp, dn, filenames in walk(path) for f in filenames if splitext(f)[1] == '.jpg']
