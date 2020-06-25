@@ -59,6 +59,7 @@ class PaintingLabeler:
                 res, diff = best_match(scores)
                 if diff > 50:
                     info = self.metadata_repository.painting_info(np.argmin(scores))
+                    info['bb'] = (x_low,x_high, y_low, y_high)
                     infos.append(info)
 
                     label_x = x_low

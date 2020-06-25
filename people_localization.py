@@ -18,10 +18,19 @@ class PeopleLocalization:
     def run(self):
         out, infos = self.people_labeler.transform(return_info=True)
 
+        room_image = self.rooms_images[0]
+
+        room_image_resized = cv2.resize(room_image, (316, 216))
+
+        out[:room_image_resized.shape[0],
+            :room_image_resized.shape[1], :] = room_image_resized
+
         if infos is None or len(infos) == 0:
-            return False
+            return out
 
         room_infos = [i['Room'] for i in infos]
+
+        paintings_infos = [i['bb'] for i in infos]
 
         room_number = int(np.array(room_infos).mean())
 
@@ -32,9 +41,9 @@ class PeopleLocalization:
         out[:room_image_resized.shape[0],
             :room_image_resized.shape[1], :] = room_image_resized
 
-        ris, _, peoples = self.p_detection.run(out)
+        ris, _, peoples = self.p_detection.run(out, paintings_infos)
         if peoples == 0:
-            return False
+            return out
 
         return ris
 
@@ -42,7 +51,7 @@ class PeopleLocalization:
 if __name__ == "__main__":
     # filename = "data_test/paintings_retrieval/011_043.jpg"
     # filename = "data_test/paintings_retrieval/094_037.jpg"
-    filename = "data_test/persone.jpg"
+    filename = "data_test/fisheye.jpg"
     # filename = "data_test/paintings_retrieval/045_076.jpg"
     # filename = random.choice(TEST_PAINTINGS)
 

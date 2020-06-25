@@ -62,14 +62,22 @@ class PeopleDetection():
         img_ = torch.from_numpy(img_).float().div(255.0).unsqueeze(0)
         return img_, orig_im, dim
 
-    def write(self, x, img, only_person=False):
+    def write(self, x, img, only_person=False, paintings_bounding_boxes=None):
         c1 = tuple(x[1:3].int())
         c2 = tuple(x[3:5].int())
         cls = int(x[-1])
-        count_persons=0
+        count_persons = 0
         if (not only_person) or (only_person and self.classes[cls] == 'person'):
             label = "{0}".format(self.classes[cls])
             color = random.choice(self.colors)
+
+            # if person is inside a painting
+            if paintings_bounding_boxes is not None:
+                # (x_min, x_max, y_min, y_max)
+                for pbb in paintings_bounding_boxes:
+                    if c1[0] > pbb[0] and c1[1] < pbb[1] and c2[0] > pbb[2] and c2[1] < pbb[3]:
+                        return 0
+
             cv2.rectangle(img, c1, c2, color, 1)
             t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 1, 1)[0]
             c2 = c1[0] + t_size[0] + 3, c1[1] + t_size[1] + 4
@@ -77,10 +85,10 @@ class PeopleDetection():
             cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4),
                         cv2.FONT_HERSHEY_PLAIN, 1, [225, 255, 255], 1)
             if only_person and self.classes[cls] == 'person':
-                count_persons+=1
+                count_persons += 1
         return count_persons
 
-    def run(self, frame):
+    def run(self, frame, paintings_bounding_boxes=None):
         img, orig_im, dim = self.prep_image(frame, self.inp_dim)
 
         im_dim = torch.FloatTensor(dim).repeat(1, 2)
@@ -102,7 +110,8 @@ class PeopleDetection():
         output[:, [1, 3]] *= frame.shape[1]
         output[:, [2, 4]] *= frame.shape[0]
 
-        persons_list = list(map(lambda x: self.write(x, orig_im, only_person=True), output))
+        persons_list = list(map(lambda x: self.write(
+            x, orig_im, only_person=True, paintings_bounding_boxes=paintings_bounding_boxes), output))
 
         persons = np.array(persons_list).sum()
 
