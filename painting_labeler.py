@@ -31,7 +31,7 @@ class PaintingLabeler:
         self.dataset = dataset
         self.metadata_repository = InfoTable(metadata_repository)
 
-    def transform(self):
+    def transform(self, return_info=False):
         if self.image is None or self.dataset is None or self.metadata_repository is None:
             return None
 
@@ -69,7 +69,7 @@ class PaintingLabeler:
                 # print(e)
                 continue
 
-        return out
+        return out if not return_info else out, infos
 
     def fit_transform(self, image_url: str, dataset: list, metadata_repository: str):
         self.fit(image_url=image_url, dataset=dataset,
