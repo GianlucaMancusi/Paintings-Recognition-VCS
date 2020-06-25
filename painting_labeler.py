@@ -12,28 +12,19 @@ import random
 
 
 class PaintingLabeler:
-    def __init__(self, dataset: list, metadata_repository: str, image=None, image_url=None):
+    def __init__(self, dataset: list, metadata_repository: str):
         super().__init__()
-        assert(image is not None or image_url is not None)
-        self.image_url = image_url
-        self.image = image if image_url == None else cv2.imread(image_url)
         self.dataset = dataset
         self.metadata_repository = InfoTable(metadata_repository)
-
-        self.detection_pipeline = Pipeline(default=True)
-        self.detection_pipeline.append(
-            Function(highlight_paintings, source=self.image, pad=100))
         self.font = cv2.FONT_HERSHEY_SIMPLEX
 
-    def fit(self, image_url: str, dataset: list, metadata_repository: str):
+    def transform(self, return_info=False, image=None, image_url=None):
         self.image_url = image_url
-        self.image = cv2.imread(image_url)
-        self.dataset = dataset
-        self.metadata_repository = InfoTable(metadata_repository)
-
-    def transform(self, return_info=False):
+        self.image = image if image_url == None else cv2.imread(image_url)
+        
         if self.image is None or self.dataset is None or self.metadata_repository is None:
             return None
+        
 
         # out = self.detection_pipeline.run(self.image, debug=False,
         #                   print_time=False, filename=self.image_url)
@@ -66,16 +57,11 @@ class PaintingLabeler:
                     label_y = y_low if i % 2 == 0 else y_high
                     cv2.putText(out, info["Title"], (label_x, label_y),
                                 self.font, 1, (255, 0, 0), 2, cv2.LINE_AA)
-            except AttributeError as e:
+            except Exception as e:
                 # print(e)
                 continue
 
         return out if not return_info else out, infos
-
-    def fit_transform(self, image_url: str, dataset: list, metadata_repository: str):
-        self.fit(image_url=image_url, dataset=dataset,
-                 metadata_repository=metadata_repository)
-        return self.transform()
 
 
 if __name__ == "__main__":
@@ -85,12 +71,12 @@ if __name__ == "__main__":
     # filename = "data_test/paintings_retrieval/045_076.jpg"
     # filename = random.choice(TEST_PAINTINGS)
 
-    labeler = PaintingLabeler(image_url=filename, dataset=[cv2.imread(
+    labeler = PaintingLabeler(dataset=[cv2.imread(
         url) for url in PAINTINGS_DB], metadata_repository='dataset/data.csv')
 
     iv = ImageViewer(cols=3)
 
-    out = labeler.transform()
+    out = labeler.transform(image_url=filename)
     iv.add(out, cmap="bgr")
     iv.show()
     cv2.waitKey(0)
