@@ -14,7 +14,7 @@ dir_path = 'dataset/paintings_db'
 PAINTINGS_DB = [os.path.join(dir_path, f).replace('\\', '/') for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
 
 dir_path = 'rooms'
-ROOMS = [join(dir_path, f).replace('\\', '/') for f in listdir(dir_path) if isfile(join(dir_path, f))]
+ROOMS = [os.path.join(dir_path, f).replace('\\', '/') for f in os.listdir(dir_path) if os.path.isfile(join(dir_path, f))]
 
 try:
     path = 'dataset/photos'
