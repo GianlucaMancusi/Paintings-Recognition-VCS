@@ -5,9 +5,10 @@ import random
 from step_04_connected_components import color_contours
 
 def couldBePainting(img: np.array, bounder, contour, width, height, area_percentage):
-    bounder_area = bounder[2]*bounder[3]
+    bounder_width, bounder_height = bounder[2], bounder[3]
+    bounder_area = bounder_width * bounder_height
     # Check that the rect is smaller than the entire image and bigger than a certain size
-    if bounder_area < img.shape[0]*img.shape[1]*0.9 and bounder[2] > width and bounder[3] > height:
+    if bounder_area < img.shape[0]*img.shape[1]*0.9 and bounder_width > width and bounder_height > height:
         # Extra to remove floors when programming
         if cv2.contourArea(contour) > bounder_area * area_percentage:
             return True
