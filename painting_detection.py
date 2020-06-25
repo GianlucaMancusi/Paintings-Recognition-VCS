@@ -44,12 +44,12 @@ def painting_detection(img, pad=1, area_perc=0.93):
                     if pts_ratio < 1.2 and pts_ratio > cv2.contourArea(contour) / (w * h):
                         paintings_contours.append(pts)
                         found_correct_shape = True
-                else:
-                    epsilon = 0.1 * cv2.arcLength(contour,True)
-                    approx = cv2.approxPolyDP(contour, epsilon, closed=True)
-                    if len(approx) == 4:
-                        paintings_contours.append(pts)
-                        found_correct_shape = True
+                    else:
+                        epsilon = 0.1 * cv2.arcLength(contour,True)
+                        approx = cv2.approxPolyDP(contour, epsilon, closed=True)
+                        if len(approx) == 4:
+                            paintings_contours.append(pts)  #UnboundLocalError: local variable 'pts' referenced before assignment
+                            found_correct_shape = True
 
 
         if not found_correct_shape:

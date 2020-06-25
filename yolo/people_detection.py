@@ -78,6 +78,9 @@ class PeopleDetection():
                     if c1[0] > pbb[0] and c1[1] < pbb[1] and c2[0] > pbb[2] and c2[1] < pbb[3]:
                         return 0
 
+            if c1==(0,0) and c2==(0,0):
+                return 0
+
             cv2.rectangle(img, c1, c2, color, 1)
             t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 1, 1)[0]
             c2 = c1[0] + t_size[0] + 3, c1[1] + t_size[1] + 4
