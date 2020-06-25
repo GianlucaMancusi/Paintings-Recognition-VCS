@@ -48,7 +48,7 @@ class PaintingLabeler:
                 img_sec = four_point_transform(image_copy, corners)
                 scores = retrieve_painting(img_sec, self.dataset)
                 res, diff = best_match(scores)
-                if diff > 50:
+                if diff > 400:
                     info = self.metadata_repository.painting_info(np.argmin(scores))
                     info['bb'] = (x_low,x_high, y_low, y_high)
                     infos.append(info)
@@ -67,7 +67,7 @@ class PaintingLabeler:
 if __name__ == "__main__":
     # filename = "data_test/paintings_retrieval/011_043.jpg"
     # filename = "data_test/paintings_retrieval/094_037.jpg"
-    filename = "data_test/paintings_retrieval/093_078_077_073_051_020.jpg"
+    filename = "dataset/photos/010/VID_20180529_112614/000090.jpg"
     # filename = "data_test/paintings_retrieval/045_076.jpg"
     # filename = random.choice(TEST_PAINTINGS)
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     iv = ImageViewer(cols=3)
 
-    out = labeler.transform(image_url=filename)
+    out, _ = labeler.transform(image_url=filename)
     iv.add(out, cmap="bgr")
     iv.show()
     cv2.waitKey(0)
