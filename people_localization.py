@@ -16,16 +16,14 @@ class PeopleLocalization:
         self.rooms_images = [cv2.imread(url) for url in ROOMS]
 
     def run(self, image=None, image_url=None):
-        out, infos = self.people_labeler.transform(return_info=True, image=image, image_url=image_url)
+        out, infos, corners = self.people_labeler.transform(return_info=True, image=image, image_url=image_url)
         room_image = self.rooms_images[0]
-        paintings_infos = None
 
         if infos is not None and len(infos) > 0:
 
             room_infos = [i['Room'] for i in infos]
-            paintings_infos = [i['bb'] for i in infos]
 
-            out, _, peoples = self.p_detection.run(out, paintings_infos)
+            out, _, peoples = self.p_detection.run(out, corners)
 
             room_number = int(np.array(room_infos).mean())
             room_image = self.rooms_images[room_number]

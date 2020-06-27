@@ -18,9 +18,9 @@ def _resolve_overflow_title_on_word(s: str, max_letters: int):
     for w in words:
         if len(w) + len(result) > max_letters:
             return result
-        
+
         result += (w + " ")
-    
+
     return result[:-1] if len(result) > 0 else s
 
 
@@ -35,20 +35,26 @@ class PaintingLabeler:
     def transform(self, return_info=False, image=None, image_url=None):
         self.image_url = image_url
         self.image = image if image_url == None else cv2.imread(image_url)
-        
+
         if self.image is None or self.dataset is None or self.metadata_repository is None:
             return None
-        
 
         from step_07_highlight_painting import _draw_all_contours
         painting_contours = painting_detection(self.image)
         out = _draw_all_contours(painting_contours, self.image)
 
         infos = []
+        corners_list = []
         for i, corners in enumerate(painting_contours):
             try:
                 y1, y2, x1, x2 = corners[1][0], corners[0][0], corners[2][0], corners[3][0]
 
+                x_low = min(x1[0], y1[0])
+                x_high = max(x2[0], y2[0])
+                y_low = min(x1[1], x2[1])
+                y_high = max(y1[1], y2[1])
+
+                corners_list.append((x_low, x_high, y_low, y_high))
 
                 image_copy = self.image.copy()
                 img_sec = four_point_transform(image_copy, corners)
@@ -58,33 +64,38 @@ class PaintingLabeler:
                     info = self.metadata_repository.painting_info(
                         np.argmin(scores))
                     infos.append(info)
-
-                    title = _resolve_overflow_title_on_word(info["Title"], self.labels_overflow_limit)
+                    title = _resolve_overflow_title_on_word(
+                        info["Title"], self.labels_overflow_limit)
                     if title != info["Title"]:
                         title += "..."
-                    
+
                     font = cv2.FONT_HERSHEY_PLAIN
                     # Since 2 for both fontScale and thickness looked good on FHD images, they're resized according to that proportion
                     fontScale = int((2 * self.image.shape[1]) / 1920)
                     thickness = int((2 * self.image.shape[1]) / 1920)
 
-                    t_size = cv2.getTextSize(title, font, fontScale, thickness)[0]
+                    t_size = cv2.getTextSize(
+                        title, font, fontScale, thickness)[0]
                     shift = int(self.image.shape[0] * 0.05)
                     left_up_x = min([corners[i][0][0] for i in range(4)])
-                    left_up_y = min([corners[i][0][1] for i in range(4)]) + shift 
-                    
-                    cv2.rectangle(out, (left_up_x, left_up_y + t_size[1]), (left_up_x + t_size[0], left_up_y), (255, 0, 0), 1)
-                    cv2.rectangle(out, (left_up_x, left_up_y + t_size[1]), (left_up_x + t_size[0], left_up_y), (255, 0, 0), -1)
-                    cv2.putText(out, title, (left_up_x, left_up_y + t_size[1]), font, fontScale, (255, 255, 255), thickness)
+                    left_up_y = min([corners[i][0][1]
+                                     for i in range(4)]) + shift
+
+                    cv2.rectangle(
+                        out, (left_up_x, left_up_y + t_size[1]), (left_up_x + t_size[0], left_up_y), (255, 0, 0), 1)
+                    cv2.rectangle(
+                        out, (left_up_x, left_up_y + t_size[1]), (left_up_x + t_size[0], left_up_y), (255, 0, 0), -1)
+                    cv2.putText(out, title, (left_up_x, left_up_y +
+                                             t_size[1]), font, fontScale, (255, 255, 255), thickness)
             except Exception as e:
                 # print(e)
                 continue
 
-        return out if not return_info else out, infos
+        return out if not return_info else out, infos, corners_list
 
 
-if __name__ == "__main__":    
-    filename = "data_test/paintings_retrieval/011_043.jpg"
+if __name__ == "__main__":
+    filename = "dataset/photos/000/VIRB0399/001500.jpg"
     # filename = "data_test/paintings_retrieval/094_037.jpg"
     # filename = "data_test/paintings_retrieval/093_078_077_073_051_020.jpg"
     # filename = "dataset/photos/010/VID_20180529_112614/000090.jpg"
