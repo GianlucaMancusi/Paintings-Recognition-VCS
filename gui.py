@@ -166,4 +166,4 @@ def create_dirs():
 if __name__ == "__main__":
     create_dirs()
     paintings_dataset = [cv2.imread(url) for url in PAINTINGS_DB]
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True, threaded=True)
