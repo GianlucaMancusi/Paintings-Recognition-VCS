@@ -3,14 +3,14 @@ import numpy as np
 import math
 
 
-def erode_dilate(input: np.array, size=5, erode=True, debug=False):
-    img = _erode_dilate(input, size, erode)
+def opening(input: np.array, size=5, erode=True, debug=False):
+    img = _opening(input, size, erode)
     if debug:
         return img, img
     else:
         return img
 
-def _erode_dilate(img: np.array, size=20, erode=True):
+def _opening(img: np.array, size=20, erode=True):
     """
     Dilates an image by using a specific structuring element
 
@@ -42,7 +42,7 @@ def _invert(img: np.array):
     return 255-img
 
 def erode_dilate_invert(img:np.array, size=5, erode=True):
-    inversion = invert(erode_dilate(img,size, erode))
+    inversion = invert(opening(img, size, erode))
     return inversion
 
 def _add_padding(img, pad=100, color=[0, 0, 0]):

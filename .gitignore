@@ -143,3 +143,5 @@ Pytorch-UNet-master/data
 Pytorch-UNet-master/labelme
 evaluations/*.json
 yolo/yolov3-tiny.weights
+
+.idea

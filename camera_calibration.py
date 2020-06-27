@@ -8,7 +8,7 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from generate_painting_masks import generate_mask
 from scipy.ndimage import gaussian_filter1d
-from step_03_dilate_invert import _add_padding
+from step_03_opening_invert import _add_padding
 
 
 def nothing(x):
