@@ -10,7 +10,7 @@ def erode_dilate(input: np.array, size=5, erode=True, debug=False):
     else:
         return img
 
-def _erode_dilate(img: np.array, size=15, erode=True):
+def _erode_dilate(img: np.array, size=20, erode=True):
     """
     Dilates an image by using a specific structuring element
 
@@ -65,10 +65,15 @@ def add_padding(input, pad=100, color=[0, 0, 0], debug=False):
         return result
 
 if __name__ == "__main__":
-    from data_test.standard_samples import RANDOM_PAINTING
+    from data_test.standard_samples import RANDOM_PAINTING, TEST_PAINTINGS
     from pipeline import Pipeline
-    img = cv2.imread(RANDOM_PAINTING)
+
+    filename = TEST_PAINTINGS[2]
+    step = 3
+
+    img = cv2.imread(filename)
     pipeline = Pipeline()
-    pipeline.set_default(3)
-    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    pipeline.set_default(step)
+    out = pipeline.run(img, debug=True, print_time=True, filename=filename)
     pipeline.debug_history().show()
+    cv2.imwrite(f'data_test/{step:02d}.jpg', out)
