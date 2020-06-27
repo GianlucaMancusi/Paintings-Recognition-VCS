@@ -178,7 +178,7 @@ def start_at(arr):
 if __name__ == "__main__":
     from image_viewer import show_me, ImageViewer
     from data_test.standard_samples import RANDOM_PAINTING, FISH_EYE, CHESSBOARD, TEST_DISTORTION, get_random_paintings
-    for paint in TEST_DISTORTION:
+    for paint in [FISH_EYE, ]:
         img = cv2.imread(paint)
         img = cv2.resize(img, (1280, 720))
         # img = distort_random(img)
@@ -217,7 +217,9 @@ if __name__ == "__main__":
         # plt.show()
 
         k = HTRDC(canvas, steps=50, range_min=-0.25, range_max=0)
-        canvas = undistort(img, k1=k)
+        # canvas = undistort(img, k1=k)
+        canvas = undistort(img, k1=-0.38, k2=0.106, fx=872, fy=872)
+        cv2.imwrite('data_test/00_calibration_desired.jpg', canvas)
         # canvas = undistort(img, k1=-0.257, k2=0.008)
         iv.add(canvas, cmap='bgr', title=f'{paint} k={k:.06f}')
         iv.show()
