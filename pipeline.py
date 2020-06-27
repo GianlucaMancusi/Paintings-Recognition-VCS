@@ -189,8 +189,7 @@ if __name__ == "__main__":
 	plots = []
 	# ho creato uno script per avere i filename delle immagini che usiamo come test
 	# for filename in TEST_PAINTINGS:
-	# filename = PEOPLE
-	filename = 'data_test/painting_09/00_calibration.jpg'
+	filename = "data_test/painting_09/00_calibration.jpg"
 	img = np.array(cv2.imread(filename))
 	# Tramite il comando append è possibile aggiungere una funzione alla pipeline,
 	# in questo caso devo farlo perchè l'ultima funzione prende come source img
