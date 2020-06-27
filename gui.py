@@ -53,7 +53,7 @@ def compute_video(video_file, print_time=True):
     out = None
 
     detection = PeopleDetection()
-    labeler = PeopleLocalization(people_detection=detection)
+    labeler = PeopleLocalization(people_detection=detection, video_mode=True)
 
     # reading the input video
     while cap.isOpened():

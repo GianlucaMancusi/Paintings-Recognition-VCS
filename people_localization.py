@@ -7,10 +7,10 @@ import numpy as np
 
 
 class PeopleLocalization:
-    def __init__(self, image=None, image_url=None, people_detection=None):
+    def __init__(self, image=None, image_url=None, people_detection=None, video_mode=False):
         super().__init__()
         self.people_labeler = PaintingLabeler(
-            [cv2.imread(url) for url in PAINTINGS_DB], "dataset/data.csv")
+            [cv2.imread(url) for url in PAINTINGS_DB], "dataset/data.csv", video_mode=video_mode)
         self.p_detection = PeopleDetection() if people_detection is None else people_detection
         from data_test.standard_samples import ROOMS
         self.rooms_images = [cv2.imread(url) for url in ROOMS]

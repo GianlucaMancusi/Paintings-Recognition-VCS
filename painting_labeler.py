@@ -25,16 +25,17 @@ def _resolve_overflow_title_on_word(s: str, max_letters: int):
 
 
 class PaintingLabeler:
-    def __init__(self, dataset: list, metadata_repository: str, image=None, image_url=None, labels_overflow_limit=50):
+    def __init__(self, dataset: list, metadata_repository: str, image=None, image_url=None, labels_overflow_limit=20, video_mode=False):
         super().__init__()
         self.dataset = dataset
         self.metadata_repository = InfoTable(metadata_repository)
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.labels_overflow_limit = labels_overflow_limit
+        self.video_mode = video_mode
 
     def transform(self, return_info=False, image=None, image_url=None):
         self.image_url = image_url
-        self.image = image if image_url == None else cv2.imread(image_url)
+        self.image = image if self.image_url == None else cv2.imread(image_url)
 
         if self.image is None or self.dataset is None or self.metadata_repository is None:
             return None
@@ -60,7 +61,9 @@ class PaintingLabeler:
                 img_sec = four_point_transform(image_copy, corners)
                 scores = retrieve_painting(img_sec, self.dataset)
                 res, diff = best_match(scores)
-                if diff > 400:
+                threshold = 400 if self.video_mode else 40
+
+                if diff > threshold:
                     info = self.metadata_repository.painting_info(
                         np.argmin(scores))
                     infos.append(info)
@@ -78,15 +81,11 @@ class PaintingLabeler:
                         title, font, fontScale, thickness)[0]
                     shift = int(self.image.shape[0] * 0.05)
                     left_up_x = min([corners[i][0][0] for i in range(4)])
-                    left_up_y = min([corners[i][0][1]
-                                     for i in range(4)]) + shift
+                    left_up_y = min([corners[i][0][1] for i in range(4)])
 
-                    cv2.rectangle(
-                        out, (left_up_x, left_up_y + t_size[1]), (left_up_x + t_size[0], left_up_y), (255, 0, 0), 1)
-                    cv2.rectangle(
-                        out, (left_up_x, left_up_y + t_size[1]), (left_up_x + t_size[0], left_up_y), (255, 0, 0), -1)
-                    cv2.putText(out, title, (left_up_x, left_up_y +
-                                             t_size[1]), font, fontScale, (255, 255, 255), thickness)
+                    cv2.rectangle(out, (left_up_x, left_up_y + t_size[1]), (left_up_x + t_size[0], left_up_y), (255, 0, 0), 1)
+                    cv2.rectangle(out, (left_up_x, left_up_y + t_size[1]), (left_up_x + t_size[0], left_up_y), (255, 0, 0), -1)
+                    cv2.putText(out, title, (left_up_x, left_up_y + t_size[1]), font, fontScale, (255, 255, 255), thickness)
             except Exception as e:
                 # print(e)
                 continue
@@ -95,20 +94,19 @@ class PaintingLabeler:
 
 
 if __name__ == "__main__":
-    filename = "dataset/photos/000/VIRB0399/001500.jpg"
+    # filename = "dataset/photos/000/VIRB0399/001500.jpg"
     # filename = "data_test/paintings_retrieval/094_037.jpg"
-    # filename = "data_test/paintings_retrieval/093_078_077_073_051_020.jpg"
+    filename = "data_test/paintings_retrieval/093_078_077_073_051_020.jpg"
     # filename = "dataset/photos/010/VID_20180529_112614/000090.jpg"
     # filename = "data_test/paintings_retrieval/045_076.jpg"
     # filename = "data_test/paintings/8.jpg"
-    filename = random.choice(TEST_PAINTINGS)
+    # filename = random.choice(TEST_PAINTINGS)
 
     labeler = PaintingLabeler(dataset=[cv2.imread(
         url) for url in PAINTINGS_DB], metadata_repository='dataset/data.csv')
 
     iv = ImageViewer(cols=3)
 
-    out, _ = labeler.transform(image_url=filename)
-    iv.add(out, cmap="bgr")
-    iv.show()
+    out = labeler.transform(image_url=filename)
+    cv2.imshow("", cv2.resize(out[0], (1920, 1080)))
     cv2.waitKey(0)
