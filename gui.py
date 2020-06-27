@@ -2,11 +2,13 @@ from flask import Flask, flash, request, redirect, url_for, render_template, sen
 from werkzeug.utils import secure_filename
 import os
 from painting_labeler import PaintingLabeler
+from people_localization import PeopleLocalization
 import cv2
 from data_test.standard_samples import PAINTINGS_DB
 from colorama import init, Fore, Back, Style
 from stopwatch import Stopwatch
 import time
+from yolo.people_detection import PeopleDetection
 
 app = Flask(__name__)
 
@@ -50,6 +52,9 @@ def compute_video(video_file, print_time=True):
     out_path = os.path.join(app.config['VIDEO_OUTPUTS_FOLDER'], video_filename)
     out = None
 
+    detection = PeopleDetection()
+    labeler = PeopleLocalization(people_detection=detection)
+
     # reading the input video
     while cap.isOpened():
         ret, frame = cap.read()
@@ -60,9 +65,8 @@ def compute_video(video_file, print_time=True):
         stopwatch = Stopwatch()
 
         # processing the frame
-        labeler = PaintingLabeler(
-            image=frame, dataset=paintings_dataset, metadata_repository="dataset/data.csv")
-        labeled = labeler.transform()
+        
+        labeled = labeler.run(image=frame)
         # end processing the frame
 
         t = stopwatch.round()
@@ -116,9 +120,8 @@ def upload_file():
                     app.config['IMAGES_UPLOAD_FOLDER'], filename)
                 file.save(original_image_url)
 
-                labeler = PaintingLabeler(
-                    image_url=original_image_url, dataset=paintings_dataset, metadata_repository="dataset/data.csv")
-                labeled = labeler.transform()
+                labeler = PeopleLocalization()
+                labeled = labeler.run(image_url=original_image_url)
 
                 labeled_image_url = os.path.join(
                     app.config['IMAGE_OUTPUTS_FOLDER'], filename)
