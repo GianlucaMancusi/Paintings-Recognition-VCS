@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from step_09_hough import hough
-from step_10_find_corners import find_corners
+from step_06_corners_detection import hough
+from step_06_corners_detection import find_corners
 
 
 def mask(img, corners):

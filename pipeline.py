@@ -88,46 +88,46 @@ class Pipeline:
 		"""
 		self.functions = []
 		if load_first is None or load_first > 0:
-			from step_01_mean_shift_seg import mean_shift_segmentation
+			from step_01_pre_processing import mean_shift_segmentation
 			self.functions.append(Function(mean_shift_segmentation))
 
 		if load_first is None or load_first > 1:
-			from step_02_mask_largest_segment import mask_largest_segment
+			from step_02_background_detection import mask_largest_segment
 			self.functions.append(Function(mask_largest_segment))
 
 		if load_first is None or load_first > 2:
-			from step_03_opening_invert import opening, invert, add_padding
+			from step_03_cleaning import opening, invert, add_padding
 			self.functions.append(Function(opening, size=5, erode=False))
 			self.functions.append(Function(invert))
 			self.functions.append(Function(add_padding, pad=100))
 
 		if load_first is None or load_first > 3:
-			from step_04_connected_components import find_contours
+			from step_04_components_selection import find_contours
 			self.functions.append(Function(find_contours))
 
 		if load_first is None or load_first > 4:
-			from step_05_find_paintings import find_possible_contours
+			from step_04_components_selection import find_possible_contours
 			self.functions.append(Function(find_possible_contours))
 
 		if load_first is None or load_first > 5:
-			from step_06_erosion import  clean_frames_noise, mask_from_contour
+			from step_05_contour_pre_processing import  clean_frames_noise, mask_from_contour
 			self.functions.append(Function(mask_from_contour, multiwrapper=True))
 			self.functions.append(Function(clean_frames_noise, multiwrapper=True))
 
 		if load_first is None or load_first > 6:
-			from step_07_median_filter import apply_median_filter
+			from step_05_contour_pre_processing import apply_median_filter
 			self.functions.append(Function(apply_median_filter, multiwrapper=True))
 
 		if load_first is None or load_first > 7:
-			from step_08_canny_edge_detection import apply_edge_detection
+			from step_05_contour_pre_processing import apply_edge_detection
 			self.functions.append(Function(apply_edge_detection, multiwrapper=True, multi_debug_merge_func=merge_sum_threshold))
 
 		if load_first is None or load_first > 8:
-			from step_09_hough import hough
+			from step_06_corners_detection import hough
 			self.functions.append(Function(hough, multiwrapper=True, pad=100))
 
 		if load_first is None or load_first > 9:
-			from step_10_find_corners import find_corners
+			from step_06_corners_detection import find_corners
 			self.functions.append(Function(find_corners, multiwrapper=True, multi_debug_merge_func=merge_sum_clip))
 	
 	def append(self, function):
@@ -173,7 +173,7 @@ class Pipeline:
 		return iv
 
 if __name__ == "__main__":
-	from step_11_highlight_painting import highlight_paintings
+	from step_07_highlight_painting import highlight_paintings
 	# from step_12_b_create_outer_rect import mask as mask_b
 	from data_test.standard_samples import TEST_PAINTINGS, FISH_EYE, PEOPLE
 

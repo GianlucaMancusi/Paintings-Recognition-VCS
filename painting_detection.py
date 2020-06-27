@@ -1,17 +1,17 @@
 import cv2
 import numpy as np
-from step_01_mean_shift_seg import _mean_shift_segmentation
-from step_02_mask_largest_segment import _mask_largest_segment
-from step_03_opening_invert import _opening, _invert, _add_padding
-from step_04_connected_components import _find_contours
-from step_05_find_paintings import _find_possible_contours
-from step_06_erosion import  _clean_frames_noise, _mask_from_contour
-from step_07_median_filter import _apply_median_filter
-from step_08_canny_edge_detection import _apply_edge_detection
-from step_09_hough import _hough
-from step_10_find_corners import _find_corners
-from step_11_highlight_painting import _highlight_paintings, _draw_all_contours
-from step_12_b_create_outer_rect import _mask, draw_rect, rect_contour
+from step_01_pre_processing import _mean_shift_segmentation
+from step_02_background_detection import _mask_largest_segment
+from step_03_cleaning import _opening, _invert, _add_padding
+from step_04_components_selection import _find_contours
+from step_04_components_selection import _find_possible_contours
+from step_05_contour_pre_processing import  _clean_frames_noise, _mask_from_contour
+from step_05_contour_pre_processing import _apply_median_filter
+from step_05_contour_pre_processing import _apply_edge_detection
+from step_06_corners_detection import _hough
+from step_06_corners_detection import _find_corners
+from step_07_highlight_painting import _highlight_paintings, _draw_all_contours
+from step_08_b_create_outer_rect import _mask, draw_rect, rect_contour
 
 def painting_detection(img, pad=1, area_perc=0.93):
     out = _mean_shift_segmentation(img)
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     from data_test.standard_samples import TEST_PAINTINGS, PEOPLE, TEST_RETRIEVAL, PERSPECTIVE, get_random_paintings
     from image_viewer import ImageViewer, show_me
     from stopwatch import Stopwatch
-    from step_09_hough import draw_lines
+    from step_06_corners_detection import draw_lines
 
     iv = ImageViewer(cols=3)
     watch = Stopwatch()

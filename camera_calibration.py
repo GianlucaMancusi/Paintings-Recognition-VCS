@@ -1,14 +1,14 @@
 import cv2
 import matplotlib.pyplot as plt
-from step_09_hough import hough
-from step_08_canny_edge_detection import _apply_edge_detection
+from step_06_corners_detection import hough
+from step_05_contour_pre_processing import _apply_edge_detection
 from skimage.transform import hough_line
 import numpy as np
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from generate_painting_masks import generate_mask
 from scipy.ndimage import gaussian_filter1d
-from step_03_opening_invert import _add_padding
+from step_03_cleaning import _add_padding
 
 
 def nothing(x):

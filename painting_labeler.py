@@ -1,7 +1,7 @@
 from painting_retrieval import *
 from painting_detection import *
 from painting_rectification import *
-from step_11_highlight_painting import highlight_paintings
+from step_07_highlight_painting import highlight_paintings
 from pipeline import *
 import matplotlib.pyplot as plt
 import cv2
@@ -40,7 +40,7 @@ class PaintingLabeler:
             return None
         
 
-        from step_11_highlight_painting import _draw_all_contours
+        from step_07_highlight_painting import _draw_all_contours
         painting_contours = painting_detection(self.image)
         out = _draw_all_contours(painting_contours, self.image)
 

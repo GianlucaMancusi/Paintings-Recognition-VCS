@@ -209,7 +209,7 @@ def mean_center(pts):
 if __name__ == "__main__":
 	from data_test.standard_samples import TEST_PAINTINGS, PERSPECTIVE, get_random_paintings
 	from image_viewer import show_me
-	from step_10_find_corners import draw_corners
+	from step_06_corners_detection import draw_corners
 	# rgbImage = cv2.imread(PERSPECTIVE)
 	for filename in TEST_PAINTINGS[::-1]:
 		rgbImage = cv2.imread(filename)
