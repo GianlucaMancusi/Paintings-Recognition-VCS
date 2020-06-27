@@ -77,11 +77,16 @@ def _mask_largest_segment(im: np.array, color_difference=2, scale_percent=1.0, x
 if __name__ == "__main__":
     from data_test.standard_samples import RANDOM_PAINTING, TEST_PAINTINGS
     from pipeline import Pipeline
-    img = cv2.imread(TEST_PAINTINGS[3])
-    # pipeline = Pipeline()
-    # pipeline.set_default(2)
-    # pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
-    # pipeline.debug_history().show()
+
+    filename = TEST_PAINTINGS[2]
+    step = 2
+
+    img = cv2.imread(filename)
+    pipeline = Pipeline()
+    pipeline.set_default(step)
+    out = pipeline.run(img, debug=True, print_time=True, filename=filename)
+    pipeline.debug_history().show()
+    cv2.imwrite(f'data_test/{step:02d}.jpg', out)
 
     # if False:
     #     from image_viewer import ImageViewer

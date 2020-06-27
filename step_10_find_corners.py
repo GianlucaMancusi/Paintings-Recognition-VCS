@@ -168,10 +168,15 @@ def _find_corners(lines):
 
 
 if __name__ == '__main__':
+    from data_test.standard_samples import RANDOM_PAINTING, TEST_PAINTINGS
     from pipeline import Pipeline
-    from data_test.standard_samples import RANDOM_PAINTING
-    img = cv2.imread(RANDOM_PAINTING)
+
+    filename = TEST_PAINTINGS[2]
+    step = 10
+
+    img = cv2.imread(filename)
     pipeline = Pipeline()
-    pipeline.set_default(10)
-    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    pipeline.set_default(step)
+    out = pipeline.run(img, debug=True, print_time=True, filename=filename)
     pipeline.debug_history().show()
+    cv2.imwrite(f'data_test/{step:02d}.jpg', out)

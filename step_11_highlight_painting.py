@@ -49,10 +49,15 @@ def _draw_all_contours(contours, img):
     return res
 
 if __name__ == '__main__':
+    from data_test.standard_samples import RANDOM_PAINTING, TEST_PAINTINGS
     from pipeline import Pipeline, Function
-    from data_test.standard_samples import RANDOM_PAINTING
-    img = cv2.imread(RANDOM_PAINTING)
+
+    filename = TEST_PAINTINGS[0]
+
+    img = cv2.imread(filename)
     pipeline = Pipeline(default=True)
     pipeline.append(Function(highlight_paintings, source=img, pad=100))
-    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
-    pipeline.debug_history().show()
+    out = pipeline.run(img, debug=True, print_time=True, filename=filename)
+    # pipeline.debug_history().show()
+    for step, out in enumerate([img, ] + pipeline.debug_out_list):
+        cv2.imwrite(f'data_test/{step:02d}.jpg', out)

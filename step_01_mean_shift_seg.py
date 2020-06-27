@@ -11,7 +11,7 @@ def mean_shift_segmentation(input : np.array, debug=False, **kwargs):
     else:
         return img
 
-def _mean_shift_segmentation(img : np.array, spatial_radius=3, color_radius=5, maximum_pyramid_level=3):
+def _mean_shift_segmentation(img : np.array, spatial_radius=3, color_radius=35, maximum_pyramid_level=3):
     """
     This function takes an image and mean-shift parameters and 
     returns a version of the image that has had mean shift 
@@ -44,10 +44,14 @@ def kmeans(img : np.array, n_colors=3):
     return less_colors
 
 if __name__ == "__main__":
-    from data_test.standard_samples import RANDOM_PAINTING
+    from data_test.standard_samples import TEST_PAINTINGS
     from pipeline import Pipeline
-    img = cv2.imread(RANDOM_PAINTING)
+
+    filename = TEST_PAINTINGS[2]
+
+    img = cv2.imread(filename)
     pipeline = Pipeline()
     pipeline.set_default(1)
-    pipeline.run(img, debug=True, print_time=True, filename=RANDOM_PAINTING)
+    out = pipeline.run(img, debug=True, print_time=True, filename=filename)
     pipeline.debug_history().show()
+    cv2.imwrite('data_test/01.jpg', out)

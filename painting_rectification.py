@@ -45,15 +45,6 @@ def aspect_ratio(corners, img):
 	k2 = ((m1y - m4y)*m3x - (m1x - m4x)*m3y + m1x*m4y - m1y*m4x) / ((m2y - m4y)*m3x - (m2x - m4x)*m3y + m2x*m4y - m2y*m4x)
 	k3 = ((m1y - m4y)*m2x - (m1x - m4x)*m2y + m1x*m4y - m1y*m4x) / ((m3y - m4y)*m2x - (m3x - m4x)*m2y + m3x*m4y - m3y*m4x)
 
-	# f_squared is the focal length of the camera, squared
-	# if k2==1 OR k3==1 then this equation is not solvable
-	# if the focal length is known, then this equation is not needed
-	# in that case assign f_squared= square(focal_length)
-	f_squared = -((k3*m3y - m1y)*(k2*m2y - m1y) + (k3*m3x - m1x)*(k2*m2x - m1x)) / ((k3 - 1)*(k2 - 1))
-
-	#The width/height ratio of the original rectangle
-	whRatio = np.sqrt((square(k2 - 1) + square(k2*m2y - m1y)/f_squared + square(k2*m2x - m1x)/f_squared) / (square(k3 - 1) + square(k3*m3y - m1y)/f_squared + square(k3*m3x - m1x)/f_squared))
-
 	# if k2==1 AND k3==1, then the focal length equation is not solvable 
 	# but the focal length is not needed to calculate the ratio.
 	# I am still trying to figure out under which circumstances k2 and k3 become 1
@@ -61,6 +52,17 @@ def aspect_ratio(corners, img):
 	# i.e. viewed straight on. Then the equation is obvious:
 	if k2 == 1 or k3 == 1:
 		whRatio = np.sqrt((square(m2y-m1y) + square(m2x-m1x)) / (square(m3y-m1y) + square(m3x-m1x)))
+	else:
+		# f_squared is the focal length of the camera, squared
+		# if k2==1 OR k3==1 then this equation is not solvable
+		# if the focal length is known, then this equation is not needed
+		# in that case assign f_squared= square(focal_length)
+		f_squared = -((k3*m3y - m1y)*(k2*m2y - m1y) + (k3*m3x - m1x)*(k2*m2x - m1x)) / ((k3 - 1)*(k2 - 1))
+		#The width/height ratio of the original rectangle
+		part_1 = (square(k2 - 1) + square(k2*m2y - m1y)/f_squared + square(k2*m2x - m1x)/f_squared)
+		part_2 = (square(k3 - 1) + square(k3*m3y - m1y)/f_squared + square(k3*m3x - m1x)/f_squared)
+		whRatio = np.sqrt(part_1 / part_2)
+		print(part_1, part_2, whRatio)
 
 	# After testing, I found that the above equations 
 	# actually give the height/width ratio of the rectangle, 
@@ -187,6 +189,14 @@ def four_point_transform(image, pts):
 def remove_pad(pts, pad):
 	return [ [x - pad, y - pad] for x, y in pts ]
 
+def cut_section(img, corners):
+	x_max = max([x[0][0] for x in corners])
+	x_min = min([x[0][0] for x in corners])
+	y_max = max([x[0][1] for x in corners])
+	y_min = min([x[0][1] for x in corners])
+	y_min, x_min = max(y_min, 1), max(x_min, 1)
+	return img[y_min:y_max,x_min:x_max]
+
 def mean_center(pts):
 	x, y = 0, 0
 	for pt in pts:
@@ -201,7 +211,7 @@ if __name__ == "__main__":
 	from image_viewer import show_me
 	from step_10_find_corners import draw_corners
 	# rgbImage = cv2.imread(PERSPECTIVE)
-	for filename in get_random_paintings(10):
+	for filename in TEST_PAINTINGS[::-1]:
 		rgbImage = cv2.imread(filename)
 		# rgbImage = cv2.rotate(rgbImage, cv2.ROTATE_90_CLOCKWISE)
 		painting_contours = painting_detection(rgbImage, area_perc=0.96)
@@ -211,11 +221,16 @@ if __name__ == "__main__":
 		for i, corners in enumerate(painting_contours):
 			iv = ImageViewer()
 			iv.add(rgbImage_num, 'original', cmap='bgr')
+			sec = cut_section(rgbImage_num, corners)
+			iv.add(sec, 'target', cmap='bgr')
+			cv2.imwrite('data_test/target.jpg', sec)
 			img = four_point_transform(rgbImage, np.array(corners))
 			if not img is None:
 				iv.add(img, 'VIT painting {}'.format(i + 1), cmap='bgr')
+				cv2.imwrite('data_test/vit.jpg', img)
 			img = painting_rectification(rgbImage, np.array(corners))
 			if not img is None:
 				iv.add(img, 'STACK painting {}'.format(i + 1), cmap='bgr')
+				cv2.imwrite('data_test/stack.jpg', img)
 			iv.show()
 

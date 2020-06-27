@@ -13,12 +13,52 @@ import json
 from datetime import datetime
 import sys
 
-def calc_dice(paint, mask):
+def recall(paint, mask, smooth=1):
+    tp = (paint * mask).sum()
+    fn = (mask * (255 - paint)).sum()
+    return (tp + smooth) / (tp + fn + smooth)
+
+def presicion(paint, mask, smooth=1):
+    tp = (paint * mask).sum()
+    fp = ((255 - mask) * paint).sum()
+    return (tp + smooth) / (tp + fp + smooth)
+
+def specificity(paint, mask, smooth=1):
+    tp = (paint * mask).sum()
+    tn = (paint * (255 - mask)).sum()
+    fn = (mask * (255 - paint)).sum()
+    fp = ((255 - mask) * paint).sum()
+    return (tn + smooth) / (tn + fp + smooth)
+
+def dice(paint, mask, smooth=1):
     sum_tot = np.sum(paint) + np.sum(mask)
-    if sum_tot == 0:
-        return 1
-    else:
-        return np.sum(paint[mask > 0]) * 2.0 / sum_tot
+    correct = np.sum(paint[mask > 0])
+    fail = np.sum(paint[mask == 0])
+    fail = min(correct, fail)
+    return (correct - fail) * 2.0 / (sum_tot + smooth)
+
+def tversky(beta, smooth=1):
+    assert 0 <= beta <= 1
+    alpha = 1 - beta
+    def _tversky(paint, mask):
+        sum_tot = np.sum(paint) + np.sum(mask)
+        tp = (paint * mask).sum()
+        fp = ((255 - mask) * paint).sum()
+        fn = (mask * (255 - paint)).sum()
+        return (tp + smooth) / (tp + alpha * fp + beta * fn + smooth)
+    return _tversky
+
+def checkup(beta):
+    tversky_func = tversky(beta)
+    def _checkup(paint, mask):
+        dice_val = dice(paint, mask)
+        tversky_val = tversky_func(paint, mask)
+        specificity_val = specificity(paint, mask)
+        presicion_val = presicion(paint, mask)
+        recall_val = recall(paint, mask)
+        return dice_val, tversky_val, specificity_val, presicion_val, recall_val
+    return _checkup
+
 
 def xml2img(filename):
     with open(filename) as fd:
@@ -53,7 +93,10 @@ def xml2img(filename):
         return mask
     return None
 
-def evaluate(function, test_perc=1.0, seed=0, **kwargs):
+def mean(vals):
+    return sum(vals) / len(vals)
+
+def evaluate(function, eval_func, test_perc=1.0, seed=0, **kwargs):
     masks_path = 'data_test/paintings_gt/masks'
     imgs_path = 'data_test/paintings_gt/imgs'
     random.seed(seed)
@@ -62,7 +105,10 @@ def evaluate(function, test_perc=1.0, seed=0, **kwargs):
     all_masks = all_files_in(masks_path)
 
     dice_vals = []
-    dice_tot = 0
+    tversky_vals = []
+    specificity_vals = []
+    presicion_vals = []
+    recall_vals = []
     filenames = []
 
     if test_perc == 1.0:
@@ -80,39 +126,79 @@ def evaluate(function, test_perc=1.0, seed=0, **kwargs):
             continue
         paint = cv2.imread(paint_path)
         out = function(paint, **kwargs)
-        dice = calc_dice(out, mask)
-        dice_tot += dice
+        # out = np.zeros_like(mask) + 255
+        dice, tversky, specificity, presicion, recall = eval_func(out, mask)
         dice_vals.append(dice)
-        filenames.append(filename)
-        print(f'  [{i + 1}/{len(pairs)}] dice_mean={dice_tot/len(dice_vals):0.4f} time={watch.total():.0f}s dice={dice:0.4f} of "{filename}"', end='\r')
+        tversky_vals.append(tversky)
+        specificity_vals.append(specificity)
+        presicion_vals.append(presicion)
+        recall_vals.append(recall)
+        print(f'  [{i + 1}/{len(pairs)}] dice={mean(dice_vals):0.4f} tversky={mean(tversky_vals):0.4f} specificity={mean(specificity_vals):0.4f} presicion={mean(presicion_vals):0.4f} recall={mean(recall_vals):0.4f} time={watch.total():.0f}s of "{filename}"', end='\r')
     sys.stdout.write("\033[K")
     time = watch.total()
-    mean = sum(dice_vals) / len(dice_vals)
-    return dice_vals, filenames, mean, time
+    return dice_vals, filenames, mean(dice_vals), mean(tversky_vals), mean(specificity_vals), mean(presicion_vals), mean(recall_vals), time
 
 if __name__ == "__main__":
+    from data_test.standard_samples import TEST_PAINTINGS
+    from image_viewer import ImageViewer
     eval_values = []
     eval_mean = []
     eval_time = []
 
     test_args = [
-        {},
+        # {'spatial_radius':5, 'color_radius':5, 'maximum_pyramid_level':3},
+        # {'size':1,},
+        # {'pad':1,},
+        # {'pad':10,},
+        # {'pad':50,},
+        # {'pad':100,},
+        # {'filter_contours':True,},
+        # {'filter_contours':False,},
+        {'beta':0.000000000001,},
+        {'beta':0.1,},
+        {'beta':0.15,},
+        {'beta':0.25,},
+        {'beta':0.33,},
+        {'beta':0.50,},
+        {'beta':0.66,},
+        {'beta':0.75,},
+        {'beta':0.85,},
+        {'beta':0.9,},
     ]
 
-    test_perc = 1
+    test_perc = 0.1
+    beta = 0.000000000001
     for kwargs in test_args:
-        dice_vals, filenames, mean, time = evaluate(generate_mask, test_perc=test_perc, **kwargs)
+        if 'beta' in kwargs:
+            beta = kwargs['beta']
+            del kwargs['beta']
+        dice_vals, filenames, dice_vals, tversky_vals, specificity_vals, presicion_vals, recall_vals, time = evaluate(generate_mask, eval_func=checkup(beta=beta), test_perc=test_perc, **kwargs)
         eval_values.append(dice_vals)
         eval_mean.append(mean)
         eval_time.append(time)
-        with open(f'evaluations/evaluation_{datetime.now().strftime("%m_%d_%H_%M_%S")}.json', 'w') as f:  # writing JSON object
-            json.dump({
-                'dice_vals': dice_vals,
-                'filenames': filenames,
-                'mean': mean,
-                'time': time,
-                'kwargs': kwargs,
-                'test_perc': test_perc,
-            }, f)
-        info = f'mean={mean:0.04f} time={time:.02f}s kwargs={kwargs}'
+        if test_perc > 0.7:
+            with open(f'evaluations/evaluation_{datetime.now().strftime("%m_%d_%H_%M_%S")}.json', 'w') as f:  # writing JSON object
+                json.dump({
+                    'dice_vals': dice_vals,
+                    'filenames': filenames,
+                    'dice': dice_vals,
+                    'tversky': tversky_vals,
+                    'specificity': specificity_vals,
+                    'presicion': presicion_vals,
+                    'recall': recall_vals,
+                    'time': time,
+                    'kwargs': kwargs,
+                    'test_perc': test_perc,
+                }, f)
+        info = f'dice={dice_vals:0.04f} tversky={tversky_vals:0.04f} specificity={specificity_vals:0.04f} presicion={presicion_vals:0.04f} recall={recall_vals:0.04f}time={time:.02f}s kwargs={kwargs} beta={beta}{" " * 64}'
         print(f'{info}')
+
+    # for test_img in TEST_PAINTINGS[::-1]:
+    #     # test_img = TEST_PAINTINGS[3]
+    #     iv = ImageViewer(cols=2)
+    #     paint = cv2.imread(test_img)
+    #     iv.add(paint, title='orig', cmap='bgr')
+    #     for kwargs in test_args:
+    #         out = generate_mask(paint, **kwargs)
+    #         iv.add(out, title=f'{kwargs}', cmap='bgr')
+    #     iv.show()
