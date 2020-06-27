@@ -97,7 +97,7 @@ class Pipeline:
 
 		if load_first is None or load_first > 2:
 			from step_03_cleaning import opening, invert, add_padding
-			self.functions.append(Function(opening, size=5, erode=False))
+			self.functions.append(Function(opening))
 			self.functions.append(Function(invert))
 			self.functions.append(Function(add_padding, pad=100))
 
@@ -189,7 +189,8 @@ if __name__ == "__main__":
 	plots = []
 	# ho creato uno script per avere i filename delle immagini che usiamo come test
 	# for filename in TEST_PAINTINGS:
-	filename = PEOPLE
+	# filename = PEOPLE
+	filename = 'data_test/painting_09/00_calibration.jpg'
 	img = np.array(cv2.imread(filename))
 	# Tramite il comando append è possibile aggiungere una funzione alla pipeline,
 	# in questo caso devo farlo perchè l'ultima funzione prende come source img
