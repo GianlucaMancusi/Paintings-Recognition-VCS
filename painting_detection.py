@@ -20,7 +20,7 @@ def painting_detection(img, pad=1, area_perc=0.93):
     out = _invert(out)
     out = _add_padding(out, pad)
     contours = _find_contours(out)
-    contours = _find_possible_contours(out, contours, min_area_percentage=0.7, min_width=150, min_height=100)
+    contours = _find_possible_contours(out, contours)
     paintings_contours = []
     # canvas = np.zeros_like(out)
     for contour in contours:
