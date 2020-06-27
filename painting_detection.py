@@ -20,37 +20,36 @@ def painting_detection(img, pad=1, area_perc=0.93):
     out = _invert(out)
     out = _add_padding(out, pad)
     contours = _find_contours(out)
-    contours = _find_possible_contours(out, contours, min_area_percentage=0.7, min_width=150, min_height=100)
+    contours = _find_possible_contours(out, contours)
     paintings_contours = []
     # canvas = np.zeros_like(out)
     for contour in contours:
         _, _, w, h = cv2.boundingRect(contour)
         found_correct_shape = False
-        if cv2.contourArea(contour) / (w * h) < area_perc:
-            for_out = _mask_from_contour(out, contour)
-            for_out = _clean_frames_noise(for_out)
-            for_out = _apply_median_filter(for_out)
-            for_out = _apply_edge_detection(for_out)
-            # canvas += for_out
-            # show_me(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) * _mask_from_contour(out, approx)[pad:-pad, pad:-pad])
-            lines = _hough(for_out)
-            if not lines is None:
-                corners = _find_corners(lines)
-                if not corners is None:
-                    pts = np.array(corners, np.int32)
-                    pts = cv2.convexHull(pts)
-                    pts = pts.reshape((-1,1,2))
-                    pts_ratio = cv2.contourArea(contour) / (cv2.contourArea(pts) + 1)
-                    if pts_ratio < 1.2 and pts_ratio > cv2.contourArea(contour) / (w * h):
-                        paintings_contours.append(pts)
-                        found_correct_shape = True
-                    else:
-                        epsilon = 0.1 * cv2.arcLength(contour,True)
-                        approx = cv2.approxPolyDP(contour, epsilon, closed=True)
-                        if len(approx) == 4:
-                            paintings_contours.append(pts)  #UnboundLocalError: local variable 'pts' referenced before assignment
-                            found_correct_shape = True
-
+        for_out = _mask_from_contour(out, contour)
+        # show_me(for_out)
+        for_out = _clean_frames_noise(for_out)
+        for_out = _apply_median_filter(for_out)
+        for_out = _apply_edge_detection(for_out)
+        # canvas += for_out
+        # show_me(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) * _mask_from_contour(out, approx)[pad:-pad, pad:-pad])
+        lines = _hough(for_out)
+        if lines is not None:
+            corners = _find_corners(lines)
+            if corners is not None:
+                pts = np.array(corners, np.int32)
+                pts = cv2.convexHull(pts)
+                pts = pts.reshape((-1,1,2))
+                pts_ratio = cv2.contourArea(contour) / (cv2.contourArea(pts) + 1)
+                if pts_ratio < 1.2 and pts_ratio > cv2.contourArea(contour) / (w * h):
+                    paintings_contours.append(pts)
+                    found_correct_shape = True
+                # else:
+                #     epsilon = 0.1 * cv2.arcLength(contour,True)
+                #     approx = cv2.approxPolyDP(contour, epsilon, closed=True)
+                #     if len(approx) == 4:
+                #         paintings_contours.append(pts)  #UnboundLocalError: local variable 'pts' referenced before assignment
+                #         found_correct_shape = True
 
         if not found_correct_shape:
             paintings_contours.append(rect_contour(contour, pad))
@@ -64,7 +63,7 @@ if __name__ == "__main__":
 
     iv = ImageViewer(cols=3)
     watch = Stopwatch()
-    for filename in get_random_paintings(10):
+    for filename in ['data_test/painting_09/00_calibration.jpg',]:
         img = cv2.imread(filename)
         # img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
         watch.start()
