@@ -6,7 +6,7 @@ Upload new File
 
 {% block content %}
 <div align="center">
-    <img src="{{ url_for('static', filename='gallerie_estensi.png') }}" width="200" height="100"> 
+    <img src="{{ url_for('static', filename='gallerie_estensi.png') }}" width="200" height="100">
 </div>
 <hr>
 <h1>Paintings recognizer</h1>
@@ -16,7 +16,7 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
 
 <div align="left">
     <form action="try_it">
-        <img src="{{ url_for('static', filename='000000.jpg') }}" width="600" height="400">
+        <img src="{{ url_for('static', filename='000000.jpg') }}" width="330" height="170">
         <input style="margin-left: 20px;" id="btnTryIt" class="btn btn-success" type="submit" value="Compute" />
         <div align="center" id="tryItLoadingIndicator" class="spinner-border text-primary" role="status"
             style="visibility: hidden"></div>
@@ -25,7 +25,7 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
     <hr>
     <br>
     <h2>Or upload your own image or video</h2>
-    <br>    
+    <br>
     <form method="post" enctype="multipart/form-data" onsubmit="onSumbit()">
         <input id="image" type="file" name="file" name="Choose a painting">
         <input id="btnSubmit" class="btn btn-primary" type="submit" value="Upload">
@@ -34,7 +34,7 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
             <span class="sr-only">Loading...</span>
         </div>
     </form>
-
+    <br><br><br><br>
 </div>
 
 <script>
