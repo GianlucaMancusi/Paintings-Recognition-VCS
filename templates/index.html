@@ -14,9 +14,16 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br><br
     <form method="post" enctype="multipart/form-data" onsubmit="onSumbit()">
         <input id="image" type="file" name="file" name="Choose a painting">
         <input id="btnSubmit" class="btn btn-primary" type="submit" value="Upload">
-        <div align="center" id="loadingIndicator" class="spinner-border text-primary" role="status" style="visibility: hidden">
+        <div align="center" id="loadingIndicator" class="spinner-border text-primary" role="status"
+            style="visibility: hidden">
             <span class="sr-only">Loading...</span>
         </div>
+    </form>
+    <br>
+    <form action="try_it">
+        <input id="btnTryIt" class="btn btn-success" type="submit" value="Try it now!" />
+        <div align="center" id="tryItLoadingIndicator" class="spinner-border text-primary" role="status"
+            style="visibility: hidden">
     </form>
 </div>
 
@@ -24,6 +31,11 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br><br
     function onSumbit() {
         $("#btnSubmit").hide();
         $("#loadingIndicator").css("visibility", "visible");
+    }
+
+    function onTryIt() {
+        $("#btnTryIt").hide();
+        $("#tryItLoadingIndicator").css("visibility", "visible");
     }
 </script>
 

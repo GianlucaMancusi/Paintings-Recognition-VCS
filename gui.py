@@ -65,7 +65,7 @@ def compute_video(video_file, print_time=True):
         stopwatch = Stopwatch()
 
         # processing the frame
-        
+
         labeled = labeler.run(image=frame)
         # end processing the frame
 
@@ -83,7 +83,8 @@ def compute_video(video_file, print_time=True):
 
         # if this is the first read we can set the output "size" and then use the same VideoWriter instance
         if out is None:
-            out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*'DIVX'), fps_input, size)
+            out = cv2.VideoWriter(
+                out_path, cv2.VideoWriter_fourcc(*'DIVX'), fps_input, size)
 
         # write the labeled (output) to the output video
         out.write(labeled)
@@ -97,9 +98,22 @@ def compute_video(video_file, print_time=True):
 def uploaded_image(filename):
     return send_from_directory(app.config['IMAGE_OUTPUTS_FOLDER'], filename)
 
+
 @app.route('/uploads_video/<filename>')
 def uploaded_video(filename):
     return send_from_directory(app.config['VIDEO_OUTPUTS_FOLDER'], filename)
+
+
+@app.route('/try_it')
+def try_it():
+    try_image_path = 'data_test\\painting_09\\00_calibration.jpg'
+    try_image_save_name = "try_image.jpg"
+
+    labeler = PaintingLabeler(dataset=[cv2.imread(url) for url in PAINTINGS_DB], metadata_repository='dataset/data.csv')
+    out = labeler.transform(image_url=try_image_path)
+    labeled_image_url = os.path.join(app.config['IMAGE_OUTPUTS_FOLDER'], try_image_save_name).replace("\\", "/")
+    cv2.imwrite(labeled_image_url, out[0])
+    return send_from_directory(app.config['IMAGE_OUTPUTS_FOLDER'], try_image_save_name)
 
 
 @app.route('/', methods=['GET', 'POST'])
