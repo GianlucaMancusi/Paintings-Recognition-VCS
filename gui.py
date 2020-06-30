@@ -10,6 +10,7 @@ from colorama import init, Fore, Back, Style
 from stopwatch import Stopwatch
 import time
 from yolo.people_detection import PeopleDetection
+from camera_calibration import *
 
 app = Flask(__name__)
 
@@ -135,8 +136,14 @@ def upload_file():
                     app.config['IMAGES_UPLOAD_FOLDER'], filename)
                 file.save(original_image_url)
 
+                img = cv2.imread(original_image_url)
+
+                if "forceCameraCalibration" in request.form:
+                    k = HTRDC(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), steps=50, range_min=-0.25, range_max=0)
+                    img = undistort(img, k1=k)
+
                 labeler = PeopleLocalization()
-                labeled = labeler.run(image_url=original_image_url)
+                labeled = labeler.run(image=img)
 
                 labeled_image_url = os.path.join(
                     app.config['IMAGE_OUTPUTS_FOLDER'], filename)
@@ -180,4 +187,4 @@ def create_dirs():
 if __name__ == "__main__":
     create_dirs()
     paintings_dataset = [cv2.imread(url) for url in PAINTINGS_DB]
-    app.run(host="127.0.0.1", port=5000, debug=True, threaded=True)
+    app.run(host="127.0.0.1", port=5000, debug=False, threaded=True)

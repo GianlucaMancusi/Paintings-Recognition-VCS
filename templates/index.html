@@ -30,9 +30,12 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
         <input id="image" type="file" name="file" name="Choose a painting">
         <input id="btnSubmit" class="btn btn-primary" type="submit" value="Upload">
         <div align="center" id="loadingIndicator" class="spinner-border text-primary" role="status"
-            style="visibility: hidden">
+            style="visibility: hidden; margin-left: 8px;">
             <span class="sr-only">Loading...</span>
         </div>
+        <br><br>
+        <input style="transform: scale(1.5); margin-right: 8px;" type="checkbox" id="chbForceCameraCalibration" name="forceCameraCalibration" value="forceCameraCalibration"/>
+        <label for="chbForceCameraCalibration"> Force camera calibration</label>
     </form>
     <br>
     <p><strong>Please note</strong>: the video output will be in <code>uploads\videos\outputs</code></p>

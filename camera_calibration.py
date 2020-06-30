@@ -74,10 +74,13 @@ def apply_fisheye(img, debug=False):
             k2 = k1
             fx = fy
 
-            print(k1, fx)
+            if debug:
+                print(k1, fx)
 
             img_undistorted = undistort(base_img, k1=k1, k2=k2, fx=fx, fy=fy)
-            cv2.imshow('undistorted', img_undistorted)
+            if debug:
+                cv2.imshow('undistorted', img_undistorted)
+                
             k = cv2.waitKey(1) & 0xFF
             if k == 27:
                 break
@@ -117,9 +120,11 @@ def HTRDC(img, steps=50, range_min=-0.25, range_max=0, epsilon=0.0001, iteration
         img_undistorted = threshold_undistort(img, k1=k)
         HT = calculate_HT(img_undistorted)
         HT_vals[i] = HT
-        cv2.imshow('undistorted', img_undistorted)
-        cv2.waitKey(1)
-        print(f'k={k:.08f} HT={HT}')
+        
+        if debug:
+            cv2.imshow('undistorted', img_undistorted)
+            cv2.waitKey(1)
+            print(f'k={k:.08f} HT={HT}')
 
     smoothed_HT_vals = gaussian_filter1d(HT_vals, 1.5)
     # plt.plot(K_range, HT_vals, label='HT')
@@ -127,7 +132,8 @@ def HTRDC(img, steps=50, range_min=-0.25, range_max=0, epsilon=0.0001, iteration
     # plt.legend()
     # # plt.plot(K_range, smoothed_HT_vals)
     # plt.show()
-    print(f'k={K_range[HT_vals.argmax()]} k_smooth={K_range[smoothed_HT_vals.argmax()]}')
+    if debug:
+        print(f'k={K_range[HT_vals.argmax()]} k_smooth={K_range[smoothed_HT_vals.argmax()]}')
     max_k = K_range[HT_vals_focus.argmax()]
     if iteration != 0 and (prev_k - max_k) <= epsilon:
         return max_k
