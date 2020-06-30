@@ -183,7 +183,7 @@ if __name__ == "__main__":
         img = cv2.resize(img, (1280, 720))
         # img = distort_random(img)
         iv = ImageViewer()
-        # img = cv2.imread("data_test\\000090.jpg", cv2.IMREAD_GRAYSCALE)
+        # img = cv2.imread("data_test/000090.jpg", cv2.IMREAD_GRAYSCALE)
         # for e in range(0,100,5):
         mask = generate_mask(img)
         iv.add(mask, cmap='bgr', title='mask')

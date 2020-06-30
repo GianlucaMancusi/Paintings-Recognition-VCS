@@ -1,6 +1,7 @@
 from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 import os
+from os import path
 from painting_labeler import PaintingLabeler
 from people_localization import PeopleLocalization
 import cv2
@@ -12,10 +13,10 @@ from yolo.people_detection import PeopleDetection
 
 app = Flask(__name__)
 
-IMAGES_UPLOAD_FOLDER = 'uploads/images'
-VIDEOS_UPLOAD_FOLDER = 'uploads/videos'
-IMAGE_OUTPUTS_FOLDER = 'uploads/images/outputs'
-VIDEO_OUTPUTS_FOLDER = 'uploads/videos/outputs'
+IMAGES_UPLOAD_FOLDER = path.join('uploads','images')
+VIDEOS_UPLOAD_FOLDER = path.join('uploads','videos')
+IMAGE_OUTPUTS_FOLDER = path.join('uploads','images','outputs')
+VIDEO_OUTPUTS_FOLDER = path.join('uploads','videos','outputs')
 
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'mov'}
@@ -106,10 +107,10 @@ def uploaded_video(filename):
 
 @app.route('/try_it')
 def try_it():
-    try_image_path = 'data_test\\painting_09\\00_calibration.jpg'
+    try_image_path = path.join('data_test','test_image.jpg')
     try_image_save_name = "try_image.jpg"
 
-    labeler = PaintingLabeler(dataset=[cv2.imread(url) for url in PAINTINGS_DB], metadata_repository='dataset/data.csv')
+    labeler = PaintingLabeler(dataset=[cv2.imread(url) for url in PAINTINGS_DB], metadata_repository=path.join('dataset','data.csv'))
     out = labeler.transform(image_url=try_image_path)
     labeled_image_url = os.path.join(app.config['IMAGE_OUTPUTS_FOLDER'], try_image_save_name).replace("\\", "/")
     cv2.imwrite(labeled_image_url, out[0])
@@ -156,9 +157,8 @@ def upload_file():
 
 
 def create_dirs():
-    from os import path
-    img_path = "uploads\\images\\outputs"
-    vid_path = "uploads\\videos\\outputs"
+    img_path = path.join("uploads","images","outputs")
+    vid_path = path.join("uploads","videos","outputs")
 
     if path.exists(img_path) or path.exists(vid_path):
         return
