@@ -4,6 +4,12 @@
 The  project  aims  to  provide  an  application  capable  of processing artistic images and videos, taken from the Galleria Estense in Modena.
 
 ### Installation
+
+First of all install the requirements.txt in your virtual environment
+```sh
+pip install -r requirements.txt
+```
+
 Download the weights of YOLO.
 ```sh
 cd yolo

@@ -177,37 +177,37 @@ if __name__ == "__main__":
 	# from step_12_b_create_outer_rect import mask as mask_b
 	from data_test.standard_samples import TEST_PAINTINGS, FISH_EYE, PEOPLE
 
-	# Creando instanziando la classe Pipeline è possibile passare come valori
-	# la lista delle funzioni che verranno eseguite, passando come valore default=True
-	# verranno impostate come pipeline di funzioni quelle di default 
+	# By creating instantiating the Pipeline class you can pass as values
+	# the list of functions that will be executed, passing as default value=True
+	# The default functions will be set as the function pipeline 
 	pipeline = Pipeline(default=True)
 
-	# l'ImageViewer adesso non ha più bisogno a priori del numero di immagini che verranno inserite
+	# The ImageViewer now no longer needs the number of images that will be inserted a priori
 	iv = ImageViewer(cols=3)
 	iv.remove_axis_values()
 
 	plots = []
-	# ho creato uno script per avere i filename delle immagini che usiamo come test
+	# I created a script to have the filenames of the images we use as tests
 	# for filename in TEST_PAINTINGS:
 	filename = "data_test/painting_09/00_calibration.jpg"
 	img = np.array(cv2.imread(filename))
-	# Tramite il comando append è possibile aggiungere una funzione alla pipeline,
-	# in questo caso devo farlo perchè l'ultima funzione prende come source img
+	# Via the append command you can add a function to the pipeline,
+	# In this case I have to do it because the last function takes as source img
 	pipeline.append(Function(highlight_paintings, source=img, pad=100))
-	# tramite il comando run eseguo le funzioni in ordine.
-	# con debug=True per ogni step vengono create delle immagini di debug che poi
-	# possono essere visualizzate in sequenza
-	# con print_time=True vengono stampati i tempi per ogni funzione
-	# filename è opzionale, serve per la stampa
+	# Using the run command I execute the functions in order.
+	# with debug=True for each step debug images are created that then
+	# can be displayed in sequence
+	# with print_time=True the times are printed for each function
+	# Filename is optional, it's for printing
 	out = pipeline.run(img, debug=True, print_time=True, filename=filename)
-	# debug_history() ritorna una classe ImageViewer con la sequenza degli output di ogni funzione
+	# debug_history() returns an ImageViewer class with the output sequence for each function
 	plots.append(pipeline.debug_history())
 	iv.add(out, cmap='bgr')
-	# con pop viene tolta l'ultima funzione dalla lista della pipeline
+	# With pop the last function is removed from the pipeline list
 	pipeline.pop()
 
 	for plot in plots:
-		# vengono visualizzati tutti i grafici di debug
+		# all debugging graphs are displayed
 		plot.show()
 	
 	iv.show()
