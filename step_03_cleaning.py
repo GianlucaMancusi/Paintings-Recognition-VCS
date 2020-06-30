@@ -3,21 +3,21 @@ import numpy as np
 import math
 
 
-def opening(input: np.array, size=5, erode=True, debug=False):
-    img = _opening(input, size, erode)
+def closing(input: np.array, size=5, erode=True, debug=False):
+    img = _closing(input, size, erode)
     if debug:
         return img, img
     else:
         return img
 
-def _opening(img: np.array, size=20, erode=True):
+def _closing(img: np.array, size=20, erode=True):
     """
-    Dilates an image by using a specific structuring element
+    Closing an image by using a specific structuring element
 
     see more: https://docs.opencv.org/2.4/modules/imgproc/doc/filtering.html?highlight=dilate#dilate
     ----------
     img : np.array
-        image where to apply the dilatation
+        image where to apply the closing
     """
     kernel = np.ones((size, size), np.uint8)
     img = cv2.dilate(img, kernel)
@@ -42,7 +42,7 @@ def _invert(img: np.array):
     return 255-img
 
 def erode_dilate_invert(img:np.array, size=5, erode=True):
-    inversion = invert(opening(img, size, erode))
+    inversion = invert(cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel = np.ones((size, size), np.uint8), iterations=5))
     return inversion
 
 def _add_padding(img, pad=100, color=[0, 0, 0]):
