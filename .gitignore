@@ -138,11 +138,13 @@ uploads/
 uploads/images/
 
 # U-Net images
-Pytorch-UNet-master/data_paint
-Pytorch-UNet-master/data
-Pytorch-UNet-master/labelme
+UNet/data_paint
+UNet/data
+UNet/labelme
 evaluations/*.json
 yolo/yolov3-tiny.weights
 
 .idea
-Pytorch-UNet-master/data_statue/masks
+UNet/data_statue/masks
+UNet/data_statue
+evaluations

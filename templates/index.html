@@ -15,11 +15,11 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
 
 
 <div align="left">
-    <form action="try_it">
+    <form action="try_it" onsubmit="onTryIt()">
         <img src="{{ url_for('static', filename='000000.jpg') }}" width="330" height="170">
         <input style="margin-left: 20px;" id="btnTryIt" class="btn btn-success" type="submit" value="Compute" />
-        <div align="center" id="tryItLoadingIndicator" class="spinner-border text-primary" role="status"
-            style="visibility: hidden"></div>
+        <div align="center" id="tryItLoadingIndicator" class="spinner-border text-success" role="status"
+            style="margin-left: 20px; visibility: hidden"></div>
     </form>
     <br>
     <hr>

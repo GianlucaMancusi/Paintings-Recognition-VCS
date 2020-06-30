@@ -22,17 +22,13 @@ def painting_detection(img, pad=1, area_perc=0.93):
     contours = _find_contours(out)
     contours = _find_possible_contours(out, contours)
     paintings_contours = []
-    # canvas = np.zeros_like(out)
     for contour in contours:
         _, _, w, h = cv2.boundingRect(contour)
         found_correct_shape = False
         for_out = _mask_from_contour(out, contour)
-        # show_me(for_out)
         for_out = _clean_frames_noise(for_out)
         for_out = _apply_median_filter(for_out)
         for_out = _apply_edge_detection(for_out)
-        # canvas += for_out
-        # show_me(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) * _mask_from_contour(out, approx)[pad:-pad, pad:-pad])
         lines = _hough(for_out)
         if lines is not None:
             corners = _find_corners(lines)
@@ -65,7 +61,6 @@ if __name__ == "__main__":
     watch = Stopwatch()
     for filename in ['data_test/painting_09/00_calibration.jpg',]:
         img = cv2.imread(filename)
-        # img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
         watch.start()
         paintigs_contours = painting_detection(img)
         res = _draw_all_contours(paintigs_contours, img)

@@ -58,6 +58,5 @@ if __name__ == '__main__':
     pipeline = Pipeline(default=True)
     pipeline.append(Function(highlight_paintings, source=img, pad=100))
     out = pipeline.run(img, debug=True, print_time=True, filename=filename)
-    # pipeline.debug_history().show()
     for step, out in enumerate([img, ] + pipeline.debug_out_list):
         cv2.imwrite(f'data_test/{step:02d}.jpg', out)
