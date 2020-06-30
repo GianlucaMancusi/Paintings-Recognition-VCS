@@ -19,7 +19,7 @@ wget https://pjreddie.com/media/files/yolov3.weights
 Download the weights of U-Net.
 ```sh
 cd Pytorch-UNet-master
-wget wget "https://drive.google.com/uc?export=download&id=ID_FILE_UNET"
+wget "https://drive.google.com/uc?export=download&id=ID_FILE_UNET"
 ```
 
 
