@@ -57,9 +57,14 @@ def compute_video(video_file, print_time=True):
     detection = PeopleDetection()
     labeler = PeopleLocalization(people_detection=detection, video_mode=True)
 
+    curr_frame = 1
+    total_t = 0
+    frame_count = None
     # reading the input video
     while cap.isOpened():
         ret, frame = cap.read()
+
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) if frame_count is None else frame_count
 
         if frame is None:
             break
@@ -72,10 +77,13 @@ def compute_video(video_file, print_time=True):
         # end processing the frame
 
         t = stopwatch.round()
+        total_t += t
+        time_remaining = (total_t / curr_frame) * (frame_count - curr_frame)
 
         if print_time:
             fps = 1 / t if t != 0 else 999
-            print(f"New frame computed: {t}s, {fps}fps")
+            print(f"[{curr_frame}/{frame_count}] time remaining {time_remaining:.0f}s\ttime single frame {t:.02}s\tfps {fps:.03}")
+        curr_frame += 1
 
         if labeled is None:
             break
