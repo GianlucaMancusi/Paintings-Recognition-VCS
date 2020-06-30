@@ -24,7 +24,7 @@ def find_contours(input: np.array, debug=False):
     # CV_RETR_TREE retrieves all of the contours and reconstructs a full hierarchy of nested contours.
     # CV_CHAIN_APPROX_NONE stores absolutely all the contour points.
     # That is, any 2 subsequent points (x1,y1) and (x2,y2) of the contour will be either horizontal, vertical or diagonal neighbors,
-    #  that is, max(abs(x1-x2),abs(y2-y1))==1.
+    # that is, max(abs(x1-x2),abs(y2-y1))==1.
     img = input
     contours = _find_contours(img)
     if debug:
@@ -46,7 +46,7 @@ def _find_contours(img: np.array):
     # CV_RETR_TREE retrieves all of the contours and reconstructs a full hierarchy of nested contours.
     # CV_CHAIN_APPROX_NONE stores absolutely all the contour points.
     # That is, any 2 subsequent points (x1,y1) and (x2,y2) of the contour will be either horizontal, vertical or diagonal neighbors,
-    #  that is, max(abs(x1-x2),abs(y2-y1))==1.
+    # that is, max(abs(x1-x2),abs(y2-y1))==1.
     contours, hierarchy = cv2.findContours(img, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE) # cv2.CHAIN_APPROX_SIMPLE to save memory
     return contours
 

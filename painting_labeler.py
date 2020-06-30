@@ -87,20 +87,13 @@ class PaintingLabeler:
                     cv2.rectangle(out, (left_up_x, left_up_y + t_size[1]), (left_up_x + t_size[0], left_up_y), (255, 0, 0), -1)
                     cv2.putText(out, title, (left_up_x, left_up_y + t_size[1]), font, fontScale, (255, 255, 255), thickness)
             except Exception as e:
-                # print(e)
                 continue
 
         return out if not return_info else out, infos, corners_list
 
 
 if __name__ == "__main__":
-    # filename = "dataset/photos/000/VIRB0399/001500.jpg"
-    # filename = "data_test/paintings_retrieval/094_037.jpg"
-    filename = "data_test/paintings_retrieval/093_078_077_073_051_020.jpg"
-    # filename = "dataset/photos/010/VID_20180529_112614/000090.jpg"
-    # filename = "data_test/paintings_retrieval/045_076.jpg"
-    # filename = "data_test/paintings/8.jpg"
-    # filename = random.choice(TEST_PAINTINGS)
+    filename = random.choice(TEST_PAINTINGS)
 
     labeler = PaintingLabeler(dataset=[cv2.imread(
         url) for url in PAINTINGS_DB], metadata_repository='dataset/data.csv')

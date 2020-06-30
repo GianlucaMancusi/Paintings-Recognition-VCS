@@ -39,11 +39,7 @@ class PeopleLocalization:
 
 
 if __name__ == "__main__":
-    # filename = "data_test/paintings_retrieval/011_043.jpg"
-    # filename = "data_test/paintings_retrieval/094_037.jpg"
     filename = "data_test/fisheye.jpg"
-    # filename = "data_test/paintings_retrieval/045_076.jpg"
-    # filename = random.choice(TEST_PAINTINGS)
 
     localizer = PeopleLocalization()
 

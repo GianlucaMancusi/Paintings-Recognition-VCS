@@ -136,16 +136,6 @@ def perspective_dim(tl, tr, br, bl):
 	if 0.0 in [width_B, width_T, height_R, height_L]:
 		return None, None
 
-	# height_ratio = max(height_L / height_R, height_R / height_L)
-	# width_ratio = max(width_B / width_T, width_T / width_B)
-
-	# if 0.0 in [height_ratio, width_ratio]:
-	# 	return None, None
-
-	# width = max(width_B, width_T) * (height_ratio ** 1)
-	# height = max(height_L, height_R) * (width_ratio ** 1)
-
-	# return int(height), int(width)
 	height_ratio = max(height_L / height_R, height_R / height_L) - 1
 	width_ratio = max(width_B / width_T, width_T / width_B) - 1
 

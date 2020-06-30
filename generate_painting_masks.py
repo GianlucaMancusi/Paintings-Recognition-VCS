@@ -47,14 +47,11 @@ def generate_mask(img, pad=1, area_perc=0.93, img_height=720,
         for_out = _mask_from_contour(out, contour)
         for_out = _clean_frames_noise(for_out)
         for_out = _apply_median_filter(for_out)
-        # for_out = _apply_edge_detection(for_out)
         canvas += for_out
     return cv2.resize(canvas[pad:-pad, pad:-pad], orig_shape)
 
 if __name__ == "__main__":
     video_path = 'dataset/photos'
-    # imgs_path = 'Pytorch-UNet-master/data_paint/imgs'
-    # masks_path = 'Pytorch-UNet-master/data_paint/masks'
     imgs_path = 'Pytorch-UNet-master/data_statue/imgs'
     masks_path = 'Pytorch-UNet-master/data_statue/masks'
     all_imgs = []
@@ -63,7 +60,6 @@ if __name__ == "__main__":
         for filename in filenames: 
             all_imgs.append(os.path.join(root,filename))
 
-    # random.shuffle(all_imgs)
     all_imgs = [ s.replace(s.split('\\')[-1], s.split('\\')[-1].lower()) for s in all_imgs]
 
     for i, img_path in enumerate(all_imgs):
@@ -73,18 +69,3 @@ if __name__ == "__main__":
         cv2.imwrite(os.path.join(imgs_path, name), img)
         cv2.imwrite(os.path.join(masks_path, name.replace('.jpg', '.png')), mask)
         print(f'  image [{i}/{len(all_imgs)}]', end='\r')
-
-    # for i, img_path in enumerate(TEST_PAINTINGS):
-    #     name = img_path.split('\\')[-1]
-    #     img = cv2.imread(img_path)
-    #     mask = generate_mask(img)
-    #     # iv = ImageViewer()
-    #     # iv.add(img, cmap='bgr')
-    #     # iv.add(mask, cmap='bgr')
-    #     # iv.show()
-    #     cv2.imwrite(os.path.join('.', name.replace('.jpg', '.png')), mask)
-    #     # cv2.imwrite(os.path.join(masks_path, name.replace('.jpg', '.png')), mask)
-    #     # cv2.imwrite(os.path.join(imgs_path, name), img)
-    #     l = 128
-    #     print(f'{i:04d} ' + '#'*int(l * (i + 1)/len(all_imgs))+'-'*int(l * (1 - (i + 1)/len(all_imgs))) + f' {(i + 1)*100/len(all_imgs):.0f}%', end='\r')
-

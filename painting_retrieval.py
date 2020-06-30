@@ -110,37 +110,6 @@ def best_match(scores):
 
 
 if __name__ == "__main__":
-    # from image_viewer import ImageViewer
-    # watch = Stopwatch()
-
-    # test_image_index = 4
-
-    # dataset = PAINTINGS_DB
-    # painting = TEST_PAINTINGS[test_image_index]
-
-    # dataset_images = [cv2.imread(url, 0) for url in dataset]
-    # painting_image = cv2.imread(painting, 0)
-
-    # top_of_values = 5
-    # iv = ImageViewer(cols=3)
-    # iv.add(painting_image, cmap='bgr', title='source')
-
-    # verbose = False
-    # watch.start()
-    # scores = retrieve_painting(painting_image, dataset_images, verbose=verbose, resize_factor=0.8)
-    # scores_np = np.array(scores)
-    # top_args = scores_np.argsort()[-top_of_values:][::-1]
-    # print(f'top-{top_of_values} options:')
-    # for i, idx in enumerate(top_args):
-    #     print(f'\t[{idx}]\t --> "{dataset[idx]}"\t score={scores_np[idx]}')
-    #     iv.add(dataset_images[idx], cmap='bgr', title=f'[{i + 1}] {scores_np[idx]}')
-    # res = top_args[0]
-    # print(watch.stop())
-    # print(f"The painting in the image {painting} is also contained in image {dataset[res]}")
-    # iv.show()
-    # if verbose:
-    #     cv2.waitKey(0)
-
     from image_viewer import ImageViewer
     from data_test.standard_samples import RANDOM_PAINTING, PAINTINGS_DB, TEST_RETRIEVAL
     from painting_rectification import four_point_transform, remove_pad
@@ -154,7 +123,6 @@ if __name__ == "__main__":
         for i, corners in enumerate(painting_contours):
             img_sec = four_point_transform(img, corners)
             if not img_sec is None:
-                # img_gray = cv2.cvtColor(img_sec, cv2.COLOR_BGR2GRAY)
                 scores = retrieve_painting(
                     img_sec, dataset_images, verbose=False, threshold=30, resize_factor=1, mse=False)
                 res, diff = best_match(scores)

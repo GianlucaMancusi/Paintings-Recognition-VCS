@@ -199,14 +199,3 @@ if __name__ == "__main__":
                 }, f)
         info = f'dice={dice_vals:0.04f} tversky={tversky_vals:0.04f} specificity={specificity_vals:0.04f} presicion={presicion_vals:0.04f} recall={recall_vals:0.04f} iou={iou_vals:0.04f} time={time:.02f}s kwargs={kwargs} beta={beta}{" " * 32}'
         print(f'{info}')
-        
-
-    # for test_img in TEST_PAINTINGS[::-1]:
-    #     # test_img = TEST_PAINTINGS[3]
-    #     iv = ImageViewer(cols=2)
-    #     paint = cv2.imread(test_img)
-    #     iv.add(paint, title='orig', cmap='bgr')
-    #     for kwargs in test_args:
-    #         out = generate_mask(paint, **kwargs)
-    #         iv.add(out, title=f'{kwargs}', cmap='bgr')
-    #     iv.show()
