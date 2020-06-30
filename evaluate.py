@@ -170,27 +170,11 @@ if __name__ == "__main__":
     eval_time = []
 
     test_args = [
-        # {'spatial_radius':5, 'color_radius':5, 'maximum_pyramid_level':3},
-        # {'size':1,},
-        # {'pad':1,},
-        # {'pad':10,},
-        # {'pad':50,},
-        # {'pad':100,},
-        # {'filter_contours':True,},
-        # {'filter_contours':False,},
-        # {'beta':0.50,},
-        # {'beta':0.50, 'color_radius':10},
-        # {'beta':0.50, 'color_radius':20},
-        # {'beta':0.50, 'color_radius':35},
-        # {'beta':0.50, 'size':31},
-        # {'beta':0.50, 'size':41},
-        # {'beta':0.50, 'size':21},
-        {'beta':0.50,},
-
+        {},
     ]
 
-    test_perc = 0.13
-    beta = 0.000000000001
+    test_perc = 1.0
+    beta = 0.5
     for kwargs in test_args:
         if 'beta' in kwargs:
             beta = kwargs['beta']
