@@ -106,7 +106,7 @@ def calculate_HT(img, sigma=3):
     H = gaussian_filter1d(H, sigma)
     return H.max()
 
-def HTRDC(img, steps=50, range_min=-0.25, range_max=0, epsilon=0.0001, iteration=0, prev_k=None):
+def HTRDC(img, steps=50, range_min=-0.25, range_max=0, epsilon=0.0001, iteration=0, prev_k=None, debug=False):
     img = _apply_edge_detection(img, 150, 250)
     step = (range_max - range_min)/steps
     K_range = np.arange(range_min, range_max, step)
