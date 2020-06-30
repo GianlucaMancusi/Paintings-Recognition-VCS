@@ -13,50 +13,71 @@ import json
 from datetime import datetime
 import sys
 
-def recall(paint, mask, smooth=1):
+tp = 0
+tn = 0
+fp = 0
+fn = 0
+
+
+def calc_metrics(paint, mask):
+    paint[paint < 127] = 0
+    paint[paint >= 127] = 255
+    mask[mask < 127] = 0
+    mask[mask >= 127] = 255
+
+    global tp, tn, fp, fn
     tp = (paint * mask).sum()
-    fn = (mask * (255 - paint)).sum()
-    return (tp + smooth) / (tp + fn + smooth)
+    tn = ((255 - paint) * (255 - mask)).sum()
+    fn = ((255 - paint) * mask).sum()
+    fp = (paint * (255 - mask)).sum()
 
-def presicion(paint, mask, smooth=1):
-    tp = (paint * mask).sum()
-    fp = ((255 - mask) * paint).sum()
-    return (tp + smooth) / (tp + fp + smooth)
 
-def specificity(paint, mask, smooth=1):
-    tp = (paint * mask).sum()
-    tn = (paint * (255 - mask)).sum()
-    fn = (mask * (255 - paint)).sum()
-    fp = ((255 - mask) * paint).sum()
-    return (tn + smooth) / (tn + fp + smooth)
+def recall(smooth=1):
+    # Quanti pixel positivi individua la rete 
+    return tp / (tp + fn + smooth)
 
-def dice(paint, mask, smooth=1):
-    sum_tot = np.sum(paint) + np.sum(mask)
-    correct = np.sum(paint[mask > 0])
-    fail = np.sum(paint[mask == 0])
-    fail = min(correct, fail)
-    return (correct - fail) * 2.0 / (sum_tot + smooth)
 
-def tversky(beta, smooth=1):
+def precision(smooth=1):
+    # se io dico che hai una malattia la precision mi dice con che probabilità ho ragione
+    return tp / (tp + fp + smooth)
+
+
+def specificity(smooth=1):
+    # se io dico che NON hai una malattia la specificity mi dice con che probabilità ho ragione
+    return tn / (tn + fp + smooth)
+
+
+# def IoU(smooth=1):
+#     # se io dico che NON hai una malattia la specificity mi dice con che probabilità ho ragione
+#     return tp / (tp + fp + fn)
+
+
+def dice(smooth=1):
+    return tp * 2.0 / (2 * tp + fn + fp + smooth)
+
+
+def tversky(beta, alpha=None):
     assert 0 <= beta <= 1
-    alpha = 1 - beta
-    def _tversky(paint, mask):
-        sum_tot = np.sum(paint) + np.sum(mask)
-        tp = (paint * mask).sum()
-        fp = ((255 - mask) * paint).sum()
-        fn = (mask * (255 - paint)).sum()
-        return (tp + smooth) / (tp + alpha * fp + beta * fn + smooth)
+    alpha = 1 - beta if alpha is None else alpha
+
+    def _tversky(smooth=1):
+        return tp / (tp + alpha * fn + beta * fp + smooth)
     return _tversky
+
 
 def checkup(beta):
     tversky_func = tversky(beta)
+    iou_func = tversky(beta=1, alpha=1)
+
     def _checkup(paint, mask):
-        dice_val = dice(paint, mask)
-        tversky_val = tversky_func(paint, mask)
-        specificity_val = specificity(paint, mask)
-        presicion_val = presicion(paint, mask)
-        recall_val = recall(paint, mask)
-        return dice_val, tversky_val, specificity_val, presicion_val, recall_val
+        calc_metrics(paint, mask)
+        dice_val = dice()
+        tversky_val = tversky_func()
+        specificity_val = specificity()
+        precision_val = precision()
+        recall_val = recall()
+        iou_val = iou_func()
+        return dice_val, tversky_val, specificity_val, precision_val, recall_val, iou_val
     return _checkup
 
 
@@ -109,6 +130,7 @@ def evaluate(function, eval_func, test_perc=1.0, seed=0, **kwargs):
     specificity_vals = []
     presicion_vals = []
     recall_vals = []
+    iou_vals = []
     filenames = []
 
     if test_perc == 1.0:
@@ -127,16 +149,18 @@ def evaluate(function, eval_func, test_perc=1.0, seed=0, **kwargs):
         paint = cv2.imread(paint_path)
         out = function(paint, **kwargs)
         # out = np.zeros_like(mask) + 255
-        dice, tversky, specificity, presicion, recall = eval_func(out, mask)
+        dice, tversky, specificity, presicion, recall, iou = eval_func(out, mask)
         dice_vals.append(dice)
         tversky_vals.append(tversky)
         specificity_vals.append(specificity)
         presicion_vals.append(presicion)
         recall_vals.append(recall)
-        print(f'  [{i + 1}/{len(pairs)}] dice={mean(dice_vals):0.4f} tversky={mean(tversky_vals):0.4f} specificity={mean(specificity_vals):0.4f} presicion={mean(presicion_vals):0.4f} recall={mean(recall_vals):0.4f} time={watch.total():.0f}s of "{filename}"', end='\r')
+        iou_vals.append(iou)
+        print(f'  [{i + 1}/{len(pairs)}] dice={mean(dice_vals):0.4f} tversky={mean(tversky_vals):0.4f} specificity={mean(specificity_vals):0.4f} presicion={mean(presicion_vals):0.4f} recall={mean(recall_vals):0.4f} iou={mean(iou_vals):0.4f} time={watch.total():.0f}s of "{filename}"', end='\r')
     sys.stdout.write("\033[K")
     time = watch.total()
-    return dice_vals, filenames, mean(dice_vals), mean(tversky_vals), mean(specificity_vals), mean(presicion_vals), mean(recall_vals), time
+    print(' '.join([f'({i}, {v:0.3f})' for i, v in enumerate(dice_vals, 1)]))
+    return dice_vals, filenames, mean(dice_vals), mean(tversky_vals), mean(specificity_vals), mean(presicion_vals), mean(recall_vals), mean(iou_vals), time
 
 if __name__ == "__main__":
     from data_test.standard_samples import TEST_PAINTINGS
@@ -154,25 +178,24 @@ if __name__ == "__main__":
         # {'pad':100,},
         # {'filter_contours':True,},
         # {'filter_contours':False,},
-        {'beta':0.000000000001,},
-        {'beta':0.1,},
-        {'beta':0.15,},
-        {'beta':0.25,},
-        {'beta':0.33,},
+        # {'beta':0.50,},
+        # {'beta':0.50, 'color_radius':10},
+        # {'beta':0.50, 'color_radius':20},
+        # {'beta':0.50, 'color_radius':35},
+        # {'beta':0.50, 'size':31},
+        # {'beta':0.50, 'size':41},
+        # {'beta':0.50, 'size':21},
         {'beta':0.50,},
-        {'beta':0.66,},
-        {'beta':0.75,},
-        {'beta':0.85,},
-        {'beta':0.9,},
+
     ]
 
-    test_perc = 0.1
+    test_perc = 0.13
     beta = 0.000000000001
     for kwargs in test_args:
         if 'beta' in kwargs:
             beta = kwargs['beta']
             del kwargs['beta']
-        dice_vals, filenames, dice_vals, tversky_vals, specificity_vals, presicion_vals, recall_vals, time = evaluate(generate_mask, eval_func=checkup(beta=beta), test_perc=test_perc, **kwargs)
+        dice_vals, filenames, dice_vals, tversky_vals, specificity_vals, presicion_vals, recall_vals, iou_vals, time = evaluate(generate_mask, eval_func=checkup(beta=beta), test_perc=test_perc, **kwargs)
         eval_values.append(dice_vals)
         eval_mean.append(mean)
         eval_time.append(time)
@@ -190,8 +213,9 @@ if __name__ == "__main__":
                     'kwargs': kwargs,
                     'test_perc': test_perc,
                 }, f)
-        info = f'dice={dice_vals:0.04f} tversky={tversky_vals:0.04f} specificity={specificity_vals:0.04f} presicion={presicion_vals:0.04f} recall={recall_vals:0.04f}time={time:.02f}s kwargs={kwargs} beta={beta}{" " * 64}'
+        info = f'dice={dice_vals:0.04f} tversky={tversky_vals:0.04f} specificity={specificity_vals:0.04f} presicion={presicion_vals:0.04f} recall={recall_vals:0.04f} iou={iou_vals:0.04f} time={time:.02f}s kwargs={kwargs} beta={beta}{" " * 32}'
         print(f'{info}')
+        
 
     # for test_img in TEST_PAINTINGS[::-1]:
     #     # test_img = TEST_PAINTINGS[3]

@@ -26,9 +26,9 @@ def scale(img, scale_percent):
 def scale_heght(img, height):
     return scale(img, height/img.shape[0])
 
-def generate_mask(img, pad=1, area_perc=0.93, img_height=360,
-                spatial_radius=3, color_radius=35, maximum_pyramid_level=3,
-                size=20,
+def generate_mask(img, pad=1, area_perc=0.93, img_height=720,
+                spatial_radius=5, color_radius=10, maximum_pyramid_level=3,
+                size=21,
                 filter_contours=True
                 ):
     orig_shape = (img.shape[1], img.shape[0])
@@ -53,8 +53,10 @@ def generate_mask(img, pad=1, area_perc=0.93, img_height=360,
 
 if __name__ == "__main__":
     video_path = 'dataset/photos'
-    imgs_path = 'Pytorch-UNet-master/data_paint/imgs'
-    masks_path = 'Pytorch-UNet-master/data_paint/masks'
+    # imgs_path = 'Pytorch-UNet-master/data_paint/imgs'
+    # masks_path = 'Pytorch-UNet-master/data_paint/masks'
+    imgs_path = 'Pytorch-UNet-master/data_statue/imgs'
+    masks_path = 'Pytorch-UNet-master/data_statue/masks'
     all_imgs = []
 
     for root, directories, filenames in os.walk(video_path):
@@ -62,18 +64,27 @@ if __name__ == "__main__":
             all_imgs.append(os.path.join(root,filename))
 
     # random.shuffle(all_imgs)
+    all_imgs = [ s.replace(s.split('\\')[-1], s.split('\\')[-1].lower()) for s in all_imgs]
 
-    for i, img_path in enumerate(TEST_PAINTINGS):
+    for i, img_path in enumerate(all_imgs):
         name = img_path.split('\\')[-1]
         img = cv2.imread(img_path)
-        mask = generate_mask(img)
-        # iv = ImageViewer()
-        # iv.add(img, cmap='bgr')
-        # iv.add(mask, cmap='bgr')
-        # iv.show()
-        cv2.imwrite(os.path.join('.', name.replace('.jpg', '.png')), mask)
-        # cv2.imwrite(os.path.join(masks_path, name.replace('.jpg', '.png')), mask)
-        # cv2.imwrite(os.path.join(imgs_path, name), img)
-        l = 128
-        print(f'{i:04d} ' + '#'*int(l * (i + 1)/len(all_imgs))+'-'*int(l * (1 - (i + 1)/len(all_imgs))) + f' {(i + 1)*100/len(all_imgs):.0f}%', end='\r')
+        mask = np.zeros_like(img)
+        cv2.imwrite(os.path.join(imgs_path, name), img)
+        cv2.imwrite(os.path.join(masks_path, name.replace('.jpg', '.png')), mask)
+        print(f'  image [{i}/{len(all_imgs)}]', end='\r')
+
+    # for i, img_path in enumerate(TEST_PAINTINGS):
+    #     name = img_path.split('\\')[-1]
+    #     img = cv2.imread(img_path)
+    #     mask = generate_mask(img)
+    #     # iv = ImageViewer()
+    #     # iv.add(img, cmap='bgr')
+    #     # iv.add(mask, cmap='bgr')
+    #     # iv.show()
+    #     cv2.imwrite(os.path.join('.', name.replace('.jpg', '.png')), mask)
+    #     # cv2.imwrite(os.path.join(masks_path, name.replace('.jpg', '.png')), mask)
+    #     # cv2.imwrite(os.path.join(imgs_path, name), img)
+    #     l = 128
+    #     print(f'{i:04d} ' + '#'*int(l * (i + 1)/len(all_imgs))+'-'*int(l * (1 - (i + 1)/len(all_imgs))) + f' {(i + 1)*100/len(all_imgs):.0f}%', end='\r')
 

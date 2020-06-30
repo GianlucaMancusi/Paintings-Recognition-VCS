@@ -145,3 +145,4 @@ evaluations/*.json
 yolo/yolov3-tiny.weights
 
 .idea
+Pytorch-UNet-master/data_statue/masks
