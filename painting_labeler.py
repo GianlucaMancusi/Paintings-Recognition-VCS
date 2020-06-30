@@ -72,6 +72,12 @@ class PaintingLabeler:
                     if title != info["Title"]:
                         title += "..."
 
+                    title = title.replace("à", "a'")
+                    title = title.replace("ò", "o'")
+                    title = title.replace("è", "e'")
+                    title = title.replace("é", "e'")
+                    title = title.replace("ù", "u'")
+
                     font = cv2.FONT_HERSHEY_PLAIN
                     # Since 2 for both fontScale and thickness looked good on FHD images, they're resized according to that proportion
                     fontScale = int((2 * self.image.shape[1]) / 1920)
