@@ -104,6 +104,7 @@ def calculate_HT(img, sigma=3):
     return H.max()
 
 def HTRDC(img, steps=50, range_min=-0.25, range_max=0, epsilon=0.0001, iteration=0, prev_k=None):
+    img = _apply_edge_detection(img, 150, 250)
     step = (range_max - range_min)/steps
     K_range = np.arange(range_min, range_max, step)
     HT_vals = np.zeros_like(K_range)
@@ -216,9 +217,9 @@ if __name__ == "__main__":
         # plt.plot(pads, vals_2)
         # plt.show()
 
-        k = HTRDC(canvas, steps=50, range_min=-0.25, range_max=0)
-        # canvas = undistort(img, k1=k)
-        canvas = undistort(img, k1=-0.38, k2=0.106, fx=872, fy=872)
+        k = HTRDC(img, steps=50, range_min=-0.25, range_max=0)
+        canvas = undistort(img, k1=k)
+        # canvas = undistort(img, k1=-0.38, k2=0.106, fx=872, fy=872)
         cv2.imwrite('data_test/00_calibration_desired.jpg', canvas)
         # canvas = undistort(img, k1=-0.257, k2=0.008)
         iv.add(canvas, cmap='bgr', title=f'{paint} k={k:.06f}')
