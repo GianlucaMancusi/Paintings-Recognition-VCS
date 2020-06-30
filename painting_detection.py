@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from step_01_pre_processing import _mean_shift_segmentation
 from step_02_background_detection import _mask_largest_segment
-from step_03_cleaning import _opening, _invert, _add_padding
+from step_03_cleaning import _closing, _invert, _add_padding
 from step_04_components_selection import _find_contours
 from step_04_components_selection import _find_possible_contours
 from step_05_contour_pre_processing import  _clean_frames_noise, _mask_from_contour
@@ -16,7 +16,7 @@ from step_08_b_create_outer_rect import _mask, draw_rect, rect_contour
 def painting_detection(img, pad=1, area_perc=0.93):
     out = _mean_shift_segmentation(img)
     out = _mask_largest_segment(out)
-    out = _opening(out)
+    out = _closing(out)
     out = _invert(out)
     out = _add_padding(out, pad)
     contours = _find_contours(out)

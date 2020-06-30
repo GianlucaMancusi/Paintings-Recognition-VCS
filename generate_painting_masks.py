@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from step_01_pre_processing import _mean_shift_segmentation
 from step_02_background_detection import _mask_largest_segment
-from step_03_cleaning import _opening, _invert, _add_padding
+from step_03_cleaning import _closing, _invert, _add_padding
 from step_04_components_selection import _find_contours
 from step_04_components_selection import _find_possible_contours
 from step_05_contour_pre_processing import  _clean_frames_noise, _mask_from_contour
@@ -35,7 +35,7 @@ def generate_mask(img, pad=1, area_perc=0.93, img_height=720,
     img = scale_heght(img, img_height)
     out = _mean_shift_segmentation(img, spatial_radius, color_radius, maximum_pyramid_level)
     out = _mask_largest_segment(out)
-    out = _opening(out, size)
+    out = _closing(out, size)
     out = _invert(out)
     out = _add_padding(out, pad)
     contours = _find_contours(out)

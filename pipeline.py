@@ -96,8 +96,8 @@ class Pipeline:
 			self.functions.append(Function(mask_largest_segment))
 
 		if load_first is None or load_first > 2:
-			from step_03_cleaning import opening, invert, add_padding
-			self.functions.append(Function(opening))
+			from step_03_cleaning import closing, invert, add_padding
+			self.functions.append(Function(closing))
 			self.functions.append(Function(invert))
 			self.functions.append(Function(add_padding, pad=100))
 
