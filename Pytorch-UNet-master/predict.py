@@ -16,11 +16,10 @@ from utils.dataset import BasicDataset
 def predict_img(net,
                 full_img,
                 device,
-                scale_factor=1,
                 out_threshold=0.5):
     net.eval()
 
-    img = torch.from_numpy(BasicDataset.preprocess(full_img, scale_factor))
+    img = BasicDataset.preprocess(full_img)
 
     img = img.unsqueeze(0)
     img = img.to(device=device, dtype=torch.float32)
@@ -38,7 +37,7 @@ def predict_img(net,
         tf = transforms.Compose(
             [
                 transforms.ToPILImage(),
-                transforms.Resize(full_img.size[1]),
+                transforms.Resize((full_img.size[1], full_img.size[0])),
                 transforms.ToTensor()
             ]
         )
@@ -72,6 +71,12 @@ def get_args():
     parser.add_argument('--scale', '-s', type=float,
                         help="Scale factor for the input images",
                         default=0.5)
+    parser.add_argument('--beta', type=float,
+                        help="beta",
+                        default=0.5)
+    parser.add_argument('--alpha', type=float,
+                        help="alpha",
+                        default=0.5)
 
     return parser.parse_args()
 
@@ -83,7 +88,7 @@ def get_output_filenames(args):
     if not args.output:
         for f in in_files:
             pathsplit = os.path.splitext(f)
-            out_files.append("{}_OUT{}".format(pathsplit[0], pathsplit[1]))
+            out_files.append("{}_OUT.png".format(pathsplit[0]))
     elif len(in_files) != len(args.output):
         logging.error("Input files and output files are not of the same length")
         raise SystemExit()
@@ -120,7 +125,6 @@ if __name__ == "__main__":
 
         mask = predict_img(net=net,
                            full_img=img,
-                           scale_factor=args.scale,
                            out_threshold=args.mask_threshold,
                            device=device)
 

@@ -3,9 +3,10 @@ import torch.nn.functional as F
 from tqdm import tqdm
 
 from dice_loss import dice_coeff
+from tversky_loss import TverskyLoss
 
 
-def eval_net(net, loader, device):
+def eval_net(net, loader, device, beta=0.5, alpha=0.5):
     """Evaluation without the densecrf with the dice coefficient"""
     net.eval()
     mask_type = torch.float32 if net.n_classes == 1 else torch.long
@@ -26,7 +27,8 @@ def eval_net(net, loader, device):
             else:
                 pred = torch.sigmoid(mask_pred)
                 pred = (pred > 0.5).float()
-                tot += dice_coeff(pred, true_masks).item()
+                # tot += dice_coeff(pred, true_masks).item()
+                tot += TverskyLoss(beta, alpha).forward(pred, true_masks).item()
             pbar.update()
 
     net.train()
