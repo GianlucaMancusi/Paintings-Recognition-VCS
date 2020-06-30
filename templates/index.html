@@ -26,15 +26,16 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
     <br>
     <h2>Or upload your own image or video</h2>
     <br>
-    <form method="post" enctype="multipart/form-data" onsubmit="onSumbit()">
+    <form autocomplete="off" method="post" enctype="multipart/form-data" onsubmit="onSumbit()">
         <input id="image" type="file" name="file" name="Choose a painting">
-        <input id="btnSubmit" class="btn btn-primary" type="submit" value="Upload">
+        <input id="btnSubmit" class="btn btn-primary" type="submit" value="Upload" disabled>
         <div align="center" id="loadingIndicator" class="spinner-border text-primary" role="status"
             style="visibility: hidden; margin-left: 8px;">
             <span class="sr-only">Loading...</span>
         </div>
         <br><br>
-        <input style="transform: scale(1.5); margin-right: 8px;" type="checkbox" id="chbForceCameraCalibration" name="forceCameraCalibration" value="forceCameraCalibration"/>
+        <input style="transform: scale(1.5); margin-right: 8px;" type="checkbox" id="chbForceCameraCalibration"
+            name="forceCameraCalibration" value="forceCameraCalibration" />
         <label for="chbForceCameraCalibration"> Force camera calibration</label>
     </form>
     <br>
@@ -43,6 +44,21 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
 </div>
 
 <script>
+    $(document).ready(
+        function () {
+            $('input:file').change(
+                function () {
+                    if ($(this).val()) {
+                        $('#btnSubmit').attr('disabled', false);
+                        // or, as has been pointed out elsewhere:
+                        // $('input:submit').removeAttr('disabled'); 
+                    }
+                    else
+                        $('#btnSubmit').attr('disabled', true);
+                }
+            );
+        });
+
     function onSumbit() {
         $("#btnSubmit").hide();
         $("#loadingIndicator").css("visibility", "visible");
