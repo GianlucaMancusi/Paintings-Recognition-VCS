@@ -5,7 +5,7 @@ The project aims to provide an application capable of processing paintings in im
 
 ### Installation
 
-1.  Save a copy of the `paintings_db` in the following directory: `dataset\paintings_db`
+1.  (optional for the retrieval) Save a copy of the `paintings_db` in the following directory: `dataset\paintings_db`
 
 2.  Download the weights of YOLO from here:
     https://pjreddie.com/media/files/yolov3.weights
@@ -23,7 +23,7 @@ The project aims to provide an application capable of processing paintings in im
     pip install -r requirements.txt
     ```
 
-5.  Download the weights of the U-Net and save them wherever you want. 
+5.  (optional) Download the weights of the U-Net and save them wherever you want. 
     You need to log in with the institutional account (UNIMORE).
     From this URL: https://drive.google.com/drive/u/2/folders/1J1imEqytdpz8P9lT2gBuB75a2rnP6HDo
 
