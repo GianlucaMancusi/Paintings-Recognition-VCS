@@ -111,7 +111,8 @@ def uploaded_image(filename):
 
 @app.route('/uploads_video/<filename>')
 def uploaded_video(filename):
-    return send_from_directory(app.config['VIDEO_OUTPUTS_FOLDER'], filename)
+    path_vid = path.join("uploads","videos","outputs",filename)
+    return f"The video has been rendered in this directory: {path_vid}"
 
 
 @app.route('/try_it')

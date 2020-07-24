@@ -15,6 +15,7 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
 
 
 <div align="left">
+    <p>You can start by experimenting on this pre-packaged image:</p>
     <form action="try_it" onsubmit="onTryIt()">
         <img src="{{ url_for('static', filename='000000.jpg') }}" width="330" height="170">
         <input style="margin-left: 20px;" id="btnTryIt" class="btn btn-success" type="submit" value="Compute" />
@@ -33,13 +34,14 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
             style="visibility: hidden; margin-left: 8px;">
             <span class="sr-only">Loading...</span>
         </div>
-        <br><br>
+        <br><p id="progress_info" style="color:seagreen; visibility: hidden;">The file is being processed! You can see the progress in the console.</p><br>
         <input style="transform: scale(1.5); margin-right: 8px;" type="checkbox" id="chbForceCameraCalibration"
             name="forceCameraCalibration" value="forceCameraCalibration" />
-        <label for="chbForceCameraCalibration"> Force (semi-)automatic  correction  of  radial  lens  distortion (HTRDC)</label>
+        <label for="chbForceCameraCalibration"> Force automatic  correction  of  radial  lens  distortion (HTRDC)</label>
     </form>
     <br>
-    <p><strong>Please note</strong>: the video output will be in <code>uploads\videos\outputs</code></p>
+    <p><strong>Please note</strong>: the video output will be in <code>uploads\videos\outputs</code>. <br>
+        It is better not to upload too big (<code>>40MB</code>) files or very long video.</p>
     <br><br><br>
 </div>
 
@@ -62,6 +64,8 @@ Powered by Vittorio Pippi, Gianluca Mancusi and Daniele Manicardi<br><br><br>
     function onSumbit() {
         $("#btnSubmit").hide();
         $("#loadingIndicator").css("visibility", "visible");
+        setInterval(function(){ $("#progress_info").css("visibility", "visible"); }, 2000);
+        
     }
 
     function onTryIt() {

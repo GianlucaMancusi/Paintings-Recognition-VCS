@@ -39,4 +39,4 @@ if __name__ == "__main__":
     # print(TEST_PAINTINGS)
     # import pathlib
     # pathlib.Path().absolute()
-    print(get_random_paintings(10))
+    print(get_random_paintings(3))

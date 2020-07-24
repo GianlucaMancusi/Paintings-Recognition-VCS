@@ -5,27 +5,34 @@ The project aims to provide an application capable of processing paintings in im
 
 ### Installation
 
-Install the requirements.txt in your virtual environment
-```sh
-pip install -r requirements.txt
-```
+1.  Save a copy of the `paintings_db` in the following directory: `dataset\paintings_db`
 
-Save a copy of the `paintings_db` in the following directory: `dataset\paintings_db`
+2.  Download the weights of YOLO from here:
+    https://pjreddie.com/media/files/yolov3.weights
+    and save the file in the `yolo` directory.
 
-Download the weights of YOLO and save the file in the `yolo` directory.
-```sh
-cd yolo
-wget https://pjreddie.com/media/files/yolov3.weights
-```
+3.  You have to install PyTorch and `torchvision`.
 
-Download the weights of the U-Net. You need to log in with the institutional account (UNIMORE).
-From this URL: https://drive.google.com/drive/u/2/folders/1J1imEqytdpz8P9lT2gBuB75a2rnP6HDo
+    A Windows only example of how to install PyTorch:
+    ```sh
+    pip install torch===1.5.1 torchvision===0.6.1 -f https://download.pytorch.org/whl/torch_stable.html
+    ```
+
+4.  Install the requirements.txt in your virtual environment
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+5.  Download the weights of the U-Net and save them wherever you want. 
+    You need to log in with the institutional account (UNIMORE).
+    From this URL: https://drive.google.com/drive/u/2/folders/1J1imEqytdpz8P9lT2gBuB75a2rnP6HDo
 
 ### How to test the project
 To start the project just run the python `gui.py` file, which will launch a web GUI from which you can test a pre-packaged image file or you can upload a new image or video file and test it.
 
-Please note: for videos it is better not to upload too big (>20MB) or very long files.
+Please note: the video output will be in `uploads\videos\outputs`
+It is better not to compute too big (40MB) files or very long video.
 
 ##### U-Net test:
 Run `predict.py` in the U-Net directory and give the weights you would like to test, the input and the output filename.
-`predict.py --model MODEL.pth --input `
+`predict.py --model MODEL.pth --input IMAGE_FILENAME`

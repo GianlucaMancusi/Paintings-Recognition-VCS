@@ -49,7 +49,6 @@ def retrieve_painting(painting, dataset, threshold=30, resize_factor=1, verbose=
         returns a histogram containing the confindence of each dataset's painting to contain the target painting 
     """
 
-    db_des_filename = "db_descriptors.npy"
     global db_descriptors
     global db_descriptors_allocated
 
